@@ -1,5 +1,8 @@
+
+
 //--AgentGen BEGIN=_BEGIN
 //--AgentGen END
+
 import org.snmp4j.agent.mo.*;
 import org.snmp4j.log.LogFactory;
 import org.snmp4j.log.LogAdapter;

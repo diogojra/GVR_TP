@@ -1,3 +1,7 @@
+
+
+
+
 //|:AgenPro|=_BEGIN
 //|AgenPro:|
 
@@ -127,6 +131,8 @@ public class Agent implements VariableProvider {
      */
     protected MOFactory getFactory() {
         //|:AgenPro|=factory
+
+
         return DefaultMOFactory.getInstance();
         //|AgenPro:|
     }
@@ -305,6 +311,8 @@ public class Agent implements VariableProvider {
      */
     public static void main(String[] args) {
         //|:AgenPro|=main
+
+
         defaultMain(args);
         //|AgenPro:|
     }
