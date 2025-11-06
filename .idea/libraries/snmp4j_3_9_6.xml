@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="snmp4j-3.9.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Downloads/snmp4j-3.9.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Downloads/snmp4j-agent-3.8.2.jar!/" />
+      <root url="file://$PROJECT_DIR$/../.." />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/../../agenpro5/doc/api" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/src" />
+      <root url="file://$PROJECT_DIR$/../../agenpro5/agenpro-mvn-task/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../../uni/redes_veiculares/maven_para_teste_app/src/main/java" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/../.." recursive="false" />
+  </library>
+</component>
