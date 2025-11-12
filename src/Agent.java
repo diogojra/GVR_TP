@@ -45,7 +45,7 @@ public class Agent implements VariableProvider {
     }
 
     private static final String DEFAULT_CL_PARAMETERS = "-c[s{=Agent.cfg}] -bc[s{=Agent.bc}]";
-    private static final String DEFAULT_CL_COMMANDS = "#address[s{=udp:127.0.0.1/161}<(udp|tcp):.*[/[0-9]+]?>] ..";
+    private static final String DEFAULT_CL_COMMANDS = "#address[s{=udp:127.0.0.1/555}<(udp|tcp):.*[/[0-9]+]?>] ..";
 
     private LogAdapter logger = LogFactory.getLogger(Agent.class);
 

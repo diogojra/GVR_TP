@@ -13,7 +13,7 @@ public class TestAgent {
         transport.listen();
 
         // Endereço do agente
-        Address targetAddress = new UdpAddress("127.0.0.1/161");
+        Address targetAddress = new UdpAddress("127.0.0.1/555");
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString("public"));
         target.setAddress(targetAddress);
