@@ -20,7 +20,7 @@ public class Modules implements MOGroup {
     private static final LogAdapter LOGGER =
             LogFactory.getLogger(Modules.class);
 
-    private GvrTpMibG1 gvrTpMibG1;
+    private GVRTPMIBG1 gvrtpmibg1;
 
     private MOFactory factory;
 
@@ -28,13 +28,13 @@ public class Modules implements MOGroup {
 //--AgentGen END
 
     public Modules() {
-        gvrTpMibG1 = new GvrTpMibG1();
+        gvrtpmibg1 = new GVRTPMIBG1();
 //--AgentGen BEGIN=_DEFAULTCONSTRUCTOR
 //--AgentGen END
     }
 
     public Modules(MOFactory factory) {
-        gvrTpMibG1 = new GvrTpMibG1(factory);
+        gvrtpmibg1 = new GVRTPMIBG1(factory);
 //--AgentGen BEGIN=_CONSTRUCTOR
 //--AgentGen END
     }
@@ -42,19 +42,19 @@ public class Modules implements MOGroup {
     public void registerMOs(MOServer server, OctetString context)
             throws DuplicateRegistrationException
     {
-        gvrTpMibG1.registerMOs(server, context);
+        gvrtpmibg1.registerMOs(server, context);
 //--AgentGen BEGIN=_registerMOs
 //--AgentGen END
     }
 
     public void unregisterMOs(MOServer server, OctetString context) {
-        gvrTpMibG1.unregisterMOs(server, context);
+        gvrtpmibg1.unregisterMOs(server, context);
 //--AgentGen BEGIN=_unregisterMOs
 //--AgentGen END
     }
 
-    public GvrTpMibG1 getGvrTpMibG1() {
-        return gvrTpMibG1;
+    public GVRTPMIBG1 getGvrtpmibg1() {
+        return gvrtpmibg1;
     }
 
 
