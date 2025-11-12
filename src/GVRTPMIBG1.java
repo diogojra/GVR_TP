@@ -681,6 +681,54 @@ public class GVRTPMIBG1
 
 //--AgentGen BEGIN=_END
 //--AgentGen END
+// Add this method to the GVRTPMIBG1 class
+public void initializeSampleData() {
+    try {
+        // Add sample data to laneEntry table
+        addLaneEntryRow(1, 10, 1, 30, 50, 25, 100, 1);  // lane 1: green, 10 vehicles
+        addLaneEntryRow(2, 5,  2, 5,  40, 15, 80,  2);  // lane 2: yellow, 5 vehicles
+        addLaneEntryRow(3, 15, 3, 45, 60, 30, 120, 1); // lane 3: red, 15 vehicles
+
+        // Add sample data to viaDestEntry table
+        addViaDestEntryRow(1, 1, 101, 25);  // id=1, lane=1, dest=101, flux=25
+        addViaDestEntryRow(1, 2, 102, 15);  // id=1, lane=2, dest=102, flux=15
+        addViaDestEntryRow(2, 1, 201, 30);  // id=2, lane=1, dest=201, flux=30
+
+        System.out.println("Sample data initialized successfully");
+    } catch (Exception e) {
+        System.err.println("Error initializing sample data: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+    // Helper methods to add rows
+    private void addLaneEntryRow(int laneID, int vehicleCount, int semaphoreColor,
+                                 int timeToChange, int capacity, int rgt, int totalVeh, int viaterminal) {
+        OID index = new OID(new int[] { laneID });
+        Variable[] values = new Variable[7];
+
+        values[0] = new Gauge32(vehicleCount);      // VehicleCount
+        values[1] = new Integer32(semaphoreColor);  // SemaphoreColor (1=green, 2=yellow, 3=red)
+        values[2] = new Integer32(timeToChange);    // TimeToChange
+        values[3] = new Integer32(capacity);        // Capacity
+        values[4] = new Integer32(rgt);             // Rgt
+        values[5] = new Integer32(totalVeh);        // TotalVeh
+        values[6] = new Integer32(viaterminal);     // Viaterminal
+
+        LaneEntryRow row = new LaneEntryRow(index, values);
+        ((MOMutableTableModel<LaneEntryRow>)laneEntryModel).addRow(row);
+    }
+
+    private void addViaDestEntryRow(int id, int laneID, int destVia, int fluxoDest) {
+        OID index = new OID(new int[] { id, laneID });
+        Variable[] values = new Variable[2];
+
+        values[0] = new Integer32(destVia);    // DestVia
+        values[1] = new Integer32(fluxoDest);  // FluxoDest
+
+        ViaDestEntryRow row = new ViaDestEntryRow(index, values);
+        ((MOMutableTableModel<ViaDestEntryRow>)viaDestEntryModel).addRow(row);
+    }
 }
 
 

@@ -145,14 +145,17 @@ public class Agent implements VariableProvider {
      * The {@link MOFactory} provided to the <code>Modules</code> constructor
      * is returned by {@link #getFactory()}.
      */
-    protected void registerMIBs()
-    {
+    protected void registerMIBs() {
         if (modules == null) {
             modules = new Modules(getFactory());
         }
         try {
             modules.registerMOs(server, null);
-            //|:AgenPro|=registerOtherContexts
+
+            // ADD THIS LINE to initialize sample data
+            modules.getGvrtpmibg1().initializeSampleData();
+
+            //|:AgenPro:|=registerOtherContexts
             //|AgenPro:|
         }
         catch (DuplicateRegistrationException drex) {
@@ -160,7 +163,6 @@ public class Agent implements VariableProvider {
                     " MIB object registration may be incomplete!", drex);
         }
     }
-
 
     public Variable getVariable(String name) {
         OID oid;
