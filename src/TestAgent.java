@@ -24,9 +24,9 @@ public class TestAgent {
         System.out.println("=== TESTANDO MIB GvrTpMibG1 ===");
 
         // Testar OIDs específicos
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.1.1.2", "VehicleCount lane 1");
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.1.1.3", "SemaphoreColor lane 1");
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.1.2.2", "VehicleCount lane 2");
+        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 1");
+        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.3.1", "SemaphoreColor lane 1");
+        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 2");
 
         // Fazer walk na tabela laneEntry
         System.out.println("\n=== TABELA laneEntry ===");

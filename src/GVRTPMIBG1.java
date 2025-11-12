@@ -681,7 +681,7 @@ public class GVRTPMIBG1
 
 //--AgentGen BEGIN=_END
 //--AgentGen END
-// Add this method to the GVRTPMIBG1 class
+
 public void initializeSampleData() {
     try {
         // Add sample data to laneEntry table
