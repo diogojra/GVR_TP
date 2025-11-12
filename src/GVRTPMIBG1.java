@@ -14,6 +14,10 @@ import org.snmp4j.log.LogFactory;
 import org.snmp4j.log.LogAdapter;
 import org.snmp4j.agent.mo.snmp.tc.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 
 //--AgentGen BEGIN=_IMPORT
@@ -683,23 +687,62 @@ public class GVRTPMIBG1
 //--AgentGen END
 
 public void initializeSampleData() {
+
     try {
-        // Add sample data to laneEntry table
-        addLaneEntryRow(1, 10, 1, 30, 50, 25, 100, 1);  // lane 1: green, 10 vehicles
-        addLaneEntryRow(2, 5,  2, 5,  40, 15, 80,  2);  // lane 2: yellow, 5 vehicles
-        addLaneEntryRow(3, 15, 3, 45, 60, 30, 120, 1); // lane 3: red, 15 vehicles
+        // Read from CSV files
 
-        // Add sample data to viaDestEntry table
-        addViaDestEntryRow(1, 1, 101, 25);  // id=1, lane=1, dest=101, flux=25
-        addViaDestEntryRow(1, 2, 102, 15);  // id=1, lane=2, dest=102, flux=15
-        addViaDestEntryRow(2, 1, 201, 30);  // id=2, lane=1, dest=201, flux=30
+        readLaneDataFromCSV("lanes.txt");
+        readViaDestDataFromCSV("viasdestino.txt");
 
-        System.out.println("Sample data initialized successfully");
+        System.out.println("Sample data initialized successfully from files");
     } catch (Exception e) {
         System.err.println("Error initializing sample data: " + e.getMessage());
         e.printStackTrace();
     }
 }
+    private void readLaneDataFromCSV(String filename) throws IOException, IOException {
+        List<String> lines = Files.readAllLines(Paths.get(filename));
+
+        // Skip header line
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) continue;
+
+            String[] parts = line.split(",");
+            if (parts.length == 8) {
+                int laneID = Integer.parseInt(parts[0]);
+                int vehicleCount = Integer.parseInt(parts[1]);
+                int semaphoreColor = Integer.parseInt(parts[2]);
+                int timeToChange = Integer.parseInt(parts[3]);
+                int capacity = Integer.parseInt(parts[4]);
+                int rgt = Integer.parseInt(parts[5]);
+                int totalVeh = Integer.parseInt(parts[6]);
+                int viaterminal = Integer.parseInt(parts[7]);
+
+                addLaneEntryRow(laneID, vehicleCount, semaphoreColor, timeToChange,capacity, rgt, totalVeh, viaterminal);
+            }
+        }
+    }
+
+    private void readViaDestDataFromCSV(String filename) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(filename));
+
+        // Skip header line
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i).trim();
+            if (line.isEmpty()) continue;
+
+            String[] parts = line.split(",");
+            if (parts.length == 4) {
+                int id = Integer.parseInt(parts[0]);
+                int laneID = Integer.parseInt(parts[1]);
+                int destVia = Integer.parseInt(parts[2]);
+                int fluxoDest = Integer.parseInt(parts[3]);
+
+                addViaDestEntryRow(id, laneID, destVia, fluxoDest);
+            }
+        }
+    }
 
     // Helper methods to add rows
     private void addLaneEntryRow(int laneID, int vehicleCount, int semaphoreColor,
