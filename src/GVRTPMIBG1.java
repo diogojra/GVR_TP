@@ -19,16 +19,17 @@ import org.snmp4j.agent.mo.snmp.tc.*;
 //--AgentGen BEGIN=_IMPORT
 //--AgentGen END
 
-public class GvrTpMibG1
+public class GVRTPMIBG1 implements MOGroup
+
 //--AgentGen BEGIN=_EXTENDS
 //--AgentGen END
-        implements MOGroup
+
 //--AgentGen BEGIN=_IMPLEMENTS
 //--AgentGen END
 {
 
     private static final LogAdapter LOGGER =
-            LogFactory.getLogger(GvrTpMibG1.class);
+            LogFactory.getLogger(GVRTPMIBG1.class);
 
 //--AgentGen BEGIN=_STATIC
 //--AgentGen END
@@ -148,18 +149,18 @@ public class GvrTpMibG1
 //--AgentGen END
 
     /**
-     * Constructs a GvrTpMibG1 instance without actually creating its
+     * Constructs a GVR-TP-MIB-G1 instance without actually creating its
      * <code>ManagedObject</code> instances. This has to be done in a
      * sub-class constructor or after construction by calling
      * {@link #createMO(MOFactory moFactory)}.
      */
-    protected GvrTpMibG1() {
+    protected GVRTPMIBG1() {
 //--AgentGen BEGIN=_DEFAULTCONSTRUCTOR
 //--AgentGen END
-    }
+}
 
     /**
-     * Constructs a GvrTpMibG1 instance and actually creates its
+     * Constructs a GVR-TP-MIB-G1 instance and actually creates its
      * <code>ManagedObject</code> instances using the supplied
      * <code>MOFactory</code> (by calling
      * {@link #createMO(MOFactory moFactory)}).
@@ -167,15 +168,15 @@ public class GvrTpMibG1
      *    the <code>MOFactory</code> to be used to create the
      *    managed objects for this module.
      */
-    public GvrTpMibG1(MOFactory moFactory) {
-        this();
-        //--AgentGen BEGIN=_FACTORYCONSTRUCTOR::factoryWrapper
-        //--AgentGen END
-        this.moFactory = moFactory;
-        createMO(moFactory);
+    public GVRTPMIBG1(MOFactory moFactory) {
+    this();
+    //--AgentGen BEGIN=_FACTORYCONSTRUCTOR::factoryWrapper
+    //--AgentGen END
+    this.moFactory = moFactory;
+    createMO(moFactory);
 //--AgentGen BEGIN=_FACTORYCONSTRUCTOR
 //--AgentGen END
-    }
+}
 
 //--AgentGen BEGIN=_CONSTRUCTORS
 //--AgentGen END
@@ -188,197 +189,197 @@ public class GvrTpMibG1
      *    creation.
      */
     protected void createMO(MOFactory moFactory) {
-        addTCsToFactory(moFactory);
-        sysUpTime =
-                moFactory.createScalar(oidSysUpTime,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
-                        new TimeTicks());
-        stepTime =
-                moFactory.createScalar(oidStepTime,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
-                        new Integer32(5));
-        createLaneEntry(moFactory);
-        createViaDestEntry(moFactory);
-    }
+    addTCsToFactory(moFactory);
+    sysUpTime =
+            moFactory.createScalar(oidSysUpTime,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                    new TimeTicks());
+    stepTime =
+            moFactory.createScalar(oidStepTime,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                    new Integer32(5));
+    createLaneEntry(moFactory);
+    createViaDestEntry(moFactory);
+}
 
     public MOScalar<TimeTicks> getSysUpTime() {
-        return sysUpTime;
-    }
+    return sysUpTime;
+}
     public MOScalar<Integer32> getStepTime() {
-        return stepTime;
-    }
+    return stepTime;
+}
 
 
     public MOTable<LaneEntryRow,MOColumn,MOTableModel<LaneEntryRow>> getLaneEntry() {
-        return laneEntry;
-    }
+    return laneEntry;
+}
 
 
     @SuppressWarnings(value={"unchecked"})
     private void createLaneEntry(MOFactory moFactory) {
-        // Index definition
-        laneEntryIndexes =
-                new MOTableSubIndex[] {
-                        moFactory.createSubIndex(oidLaneID,
-                                SMIConstants.SYNTAX_INTEGER, 1, 1)
-                };
+    // Index definition
+    laneEntryIndexes =
+            new MOTableSubIndex[] {
+                    moFactory.createSubIndex(oidLaneID,
+                            SMIConstants.SYNTAX_INTEGER, 1, 1)
+            };
 
-        laneEntryIndex =
-                moFactory.createIndex(laneEntryIndexes,
-                        false,
-                        new MOTableIndexValidator() {
-                            public boolean isValidIndex(OID index) {
-                                boolean isValidIndex = true;
-                                //--AgentGen BEGIN=laneEntry::isValidIndex
-                                //--AgentGen END
-                                return isValidIndex;
-                            }
-                        });
+    laneEntryIndex =
+            moFactory.createIndex(laneEntryIndexes,
+                    false,
+                    new MOTableIndexValidator() {
+                        public boolean isValidIndex(OID index) {
+                            boolean isValidIndex = true;
+                            //--AgentGen BEGIN=laneEntry::isValidIndex
+                            //--AgentGen END
+                            return isValidIndex;
+                        }
+                    });
 
-        // Columns
-        MOColumn[] laneEntryColumns = new MOColumn[9];
-        laneEntryColumns[idxLaneID] =
-                moFactory.createColumn(colLaneID,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
-                        tcModuleGvrTpMibG1,
-                        tcDefLaneID);
-        laneEntryColumns[idxVehicleCount] =
-                new MOMutableColumn<Gauge32>(colVehicleCount,
-                        SMIConstants.SYNTAX_GAUGE32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
-                        (Gauge32)null
-                        //--AgentGen BEGIN=vehicleCount::auxInit
-                        //--AgentGen END
-                );
-        ((MOMutableColumn)laneEntryColumns[idxVehicleCount]).
-                addMOValueValidationListener(new VehicleCountValidator());
-        laneEntryColumns[idxSemaphoreColor] =
-                new MOMutableColumn<Integer32>(colSemaphoreColor,
-                        SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
-                        (Integer32)null
-                        //--AgentGen BEGIN=semaphoreColor::auxInit
-                        //--AgentGen END
-                );
-        ValueConstraint semaphoreColorVC = new EnumerationConstraint(
-                new int[] { 1,
-                        2,
-                        3 });
-        ((MOMutableColumn)laneEntryColumns[idxSemaphoreColor]).
-                addMOValueValidationListener(new ValueConstraintValidator(semaphoreColorVC));
-        ((MOMutableColumn)laneEntryColumns[idxSemaphoreColor]).
-                addMOValueValidationListener(new SemaphoreColorValidator());
-        laneEntryColumns[idxTimeToChange] =
-                new MOMutableColumn<Integer32>(colTimeToChange,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
-                        (Integer32)null
-                        //--AgentGen BEGIN=timeToChange::auxInit
-                        //--AgentGen END
-                );
-        ValueConstraint timeToChangeVC = new ConstraintsImpl();
-        ((ConstraintsImpl)timeToChangeVC).add(new Constraint(0L, 2147483647L));
-        ((MOMutableColumn)laneEntryColumns[idxTimeToChange]).
-                addMOValueValidationListener(new ValueConstraintValidator(timeToChangeVC));
-        ((MOMutableColumn)laneEntryColumns[idxTimeToChange]).
-                addMOValueValidationListener(new TimeToChangeValidator());
-        laneEntryColumns[idxCapacity] =
-                moFactory.createColumn(colCapacity,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        laneEntryColumns[idxFluxo] =
-                moFactory.createColumn(colFluxo,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        laneEntryColumns[idxTotalVeh] =
-                new MOMutableColumn<Integer32>(colTotalVeh,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
-                        (Integer32)null
-                        //--AgentGen BEGIN=totalVeh::auxInit
-                        //--AgentGen END
-                );
-        ((MOMutableColumn)laneEntryColumns[idxTotalVeh]).
-                addMOValueValidationListener(new TotalVehValidator());
-        laneEntryColumns[idxViaterminal] =
-                moFactory.createColumn(colViaterminal,
-                        SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        laneEntryColumns[idxRtg] =
-                moFactory.createColumn(colRtg,
-                        SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        // Table model
-        laneEntryModel =
-                moFactory.createTableModel(oidLaneEntry,
-                        laneEntryIndex,
-                        laneEntryColumns);
-        ((MOMutableTableModel<LaneEntryRow>)laneEntryModel).setRowFactory(
-                new LaneEntryRowFactory());
-        laneEntry =
-                moFactory.createTable(oidLaneEntry,
-                        laneEntryIndex,
-                        laneEntryColumns,
-                        laneEntryModel);
-    }
+    // Columns
+    MOColumn[] laneEntryColumns = new MOColumn[9];
+    laneEntryColumns[idxLaneID] =
+            moFactory.createColumn(colLaneID,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                    tcModuleGvrTpMibG1,
+                    tcDefLaneID);
+    laneEntryColumns[idxVehicleCount] =
+            new MOMutableColumn<Gauge32>(colVehicleCount,
+                    SMIConstants.SYNTAX_GAUGE32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                    (Gauge32)null
+                    //--AgentGen BEGIN=vehicleCount::auxInit
+                    //--AgentGen END
+            );
+    ((MOMutableColumn)laneEntryColumns[idxVehicleCount]).
+            addMOValueValidationListener(new VehicleCountValidator());
+    laneEntryColumns[idxSemaphoreColor] =
+            new MOMutableColumn<Integer32>(colSemaphoreColor,
+                    SMIConstants.SYNTAX_INTEGER,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                    (Integer32)null
+                    //--AgentGen BEGIN=semaphoreColor::auxInit
+                    //--AgentGen END
+            );
+    ValueConstraint semaphoreColorVC = new EnumerationConstraint(
+            new int[] { 1,
+                    2,
+                    3 });
+    ((MOMutableColumn)laneEntryColumns[idxSemaphoreColor]).
+            addMOValueValidationListener(new ValueConstraintValidator(semaphoreColorVC));
+    ((MOMutableColumn)laneEntryColumns[idxSemaphoreColor]).
+            addMOValueValidationListener(new SemaphoreColorValidator());
+    laneEntryColumns[idxTimeToChange] =
+            new MOMutableColumn<Integer32>(colTimeToChange,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                    (Integer32)null
+                    //--AgentGen BEGIN=timeToChange::auxInit
+                    //--AgentGen END
+            );
+    ValueConstraint timeToChangeVC = new ConstraintsImpl();
+    ((ConstraintsImpl)timeToChangeVC).add(new Constraint(0L, 2147483647L));
+    ((MOMutableColumn)laneEntryColumns[idxTimeToChange]).
+            addMOValueValidationListener(new ValueConstraintValidator(timeToChangeVC));
+    ((MOMutableColumn)laneEntryColumns[idxTimeToChange]).
+            addMOValueValidationListener(new TimeToChangeValidator());
+    laneEntryColumns[idxCapacity] =
+            moFactory.createColumn(colCapacity,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    laneEntryColumns[idxFluxo] =
+            moFactory.createColumn(colFluxo,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    laneEntryColumns[idxTotalVeh] =
+            new MOMutableColumn<Integer32>(colTotalVeh,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                    (Integer32)null
+                    //--AgentGen BEGIN=totalVeh::auxInit
+                    //--AgentGen END
+            );
+    ((MOMutableColumn)laneEntryColumns[idxTotalVeh]).
+            addMOValueValidationListener(new TotalVehValidator());
+    laneEntryColumns[idxViaterminal] =
+            moFactory.createColumn(colViaterminal,
+                    SMIConstants.SYNTAX_INTEGER,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    laneEntryColumns[idxRtg] =
+            moFactory.createColumn(colRtg,
+                    SMIConstants.SYNTAX_INTEGER,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    // Table model
+    laneEntryModel =
+            moFactory.createTableModel(oidLaneEntry,
+                    laneEntryIndex,
+                    laneEntryColumns);
+    ((MOMutableTableModel<LaneEntryRow>)laneEntryModel).setRowFactory(
+            new LaneEntryRowFactory());
+    laneEntry =
+            moFactory.createTable(oidLaneEntry,
+                    laneEntryIndex,
+                    laneEntryColumns,
+                    laneEntryModel);
+}
 
     public MOTable<ViaDestEntryRow,MOColumn,MOTableModel<ViaDestEntryRow>> getViaDestEntry() {
-        return viaDestEntry;
-    }
+    return viaDestEntry;
+}
 
 
     @SuppressWarnings(value={"unchecked"})
     private void createViaDestEntry(MOFactory moFactory) {
-        // Index definition
-        viaDestEntryIndexes =
-                new MOTableSubIndex[] {
-                        moFactory.createSubIndex(oidId,
-                                SMIConstants.SYNTAX_INTEGER, 1, 1),
-                        moFactory.createSubIndex(oidLaneID,
-                                SMIConstants.SYNTAX_INTEGER, 1, 1)
-                };
+    // Index definition
+    viaDestEntryIndexes =
+            new MOTableSubIndex[] {
+                    moFactory.createSubIndex(oidId,
+                            SMIConstants.SYNTAX_INTEGER, 1, 1),
+                    moFactory.createSubIndex(oidLaneID,
+                            SMIConstants.SYNTAX_INTEGER, 1, 1)
+            };
 
-        viaDestEntryIndex =
-                moFactory.createIndex(viaDestEntryIndexes,
-                        false,
-                        new MOTableIndexValidator() {
-                            public boolean isValidIndex(OID index) {
-                                boolean isValidIndex = true;
-                                //--AgentGen BEGIN=viaDestEntry::isValidIndex
-                                //--AgentGen END
-                                return isValidIndex;
-                            }
-                        });
+    viaDestEntryIndex =
+            moFactory.createIndex(viaDestEntryIndexes,
+                    false,
+                    new MOTableIndexValidator() {
+                        public boolean isValidIndex(OID index) {
+                            boolean isValidIndex = true;
+                            //--AgentGen BEGIN=viaDestEntry::isValidIndex
+                            //--AgentGen END
+                            return isValidIndex;
+                        }
+                    });
 
-        // Columns
-        MOColumn[] viaDestEntryColumns = new MOColumn[2];
-        viaDestEntryColumns[idxDestVia] =
-                moFactory.createColumn(colDestVia,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        viaDestEntryColumns[idxFluxoDest] =
-                moFactory.createColumn(colFluxoDest,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
-        // Table model
-        viaDestEntryModel =
-                moFactory.createTableModel(oidViaDestEntry,
-                        viaDestEntryIndex,
-                        viaDestEntryColumns);
-        ((MOMutableTableModel<ViaDestEntryRow>)viaDestEntryModel).setRowFactory(
-                new ViaDestEntryRowFactory());
-        viaDestEntry =
-                moFactory.createTable(oidViaDestEntry,
-                        viaDestEntryIndex,
-                        viaDestEntryColumns,
-                        viaDestEntryModel);
-    }
+    // Columns
+    MOColumn[] viaDestEntryColumns = new MOColumn[2];
+    viaDestEntryColumns[idxDestVia] =
+            moFactory.createColumn(colDestVia,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    viaDestEntryColumns[idxFluxoDest] =
+            moFactory.createColumn(colFluxoDest,
+                    SMIConstants.SYNTAX_INTEGER32,
+                    moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+    // Table model
+    viaDestEntryModel =
+            moFactory.createTableModel(oidViaDestEntry,
+                    viaDestEntryIndex,
+                    viaDestEntryColumns);
+    ((MOMutableTableModel<ViaDestEntryRow>)viaDestEntryModel).setRowFactory(
+            new ViaDestEntryRowFactory());
+    viaDestEntry =
+            moFactory.createTable(oidViaDestEntry,
+                    viaDestEntryIndex,
+                    viaDestEntryColumns,
+                    viaDestEntryModel);
+}
 
 
 
     public void registerMOs(MOServer server, OctetString context)
-            throws DuplicateRegistrationException
+    throws DuplicateRegistrationException
     {
         // Scalar Objects
         server.register(this.sysUpTime, context);
@@ -390,14 +391,14 @@ public class GvrTpMibG1
     }
 
     public void unregisterMOs(MOServer server, OctetString context) {
-        // Scalar Objects
-        server.unregister(this.sysUpTime, context);
-        server.unregister(this.stepTime, context);
-        server.unregister(this.laneEntry, context);
-        server.unregister(this.viaDestEntry, context);
+    // Scalar Objects
+    server.unregister(this.sysUpTime, context);
+    server.unregister(this.stepTime, context);
+    server.unregister(this.laneEntry, context);
+    server.unregister(this.viaDestEntry, context);
 //--AgentGen BEGIN=_unregisterMOs
 //--AgentGen END
-    }
+}
 
     // Notifications
 
@@ -762,11 +763,11 @@ public class GvrTpMibG1
 //--AgentGen BEGIN=_METHODS
 //--AgentGen END
 
-    // Textual Definitions of MIB module GvrTpMibG1
+    // Textual Definitions of MIB module GVR-TP-MIB-G1
     protected void addTCsToFactory(MOFactory moFactory) {
-        moFactory.addTextualConvention(new SemaphoreColor());
-        moFactory.addTextualConvention(new LaneID());
-    }
+    moFactory.addTextualConvention(new SemaphoreColor());
+    moFactory.addTextualConvention(new LaneID());
+}
 
 
     public class SemaphoreColor implements TextualConvention {
@@ -881,7 +882,7 @@ public class GvrTpMibG1
 
     // Textual Definitions of other MIB modules
     public void addImportedTCsToFactory(MOFactory moFactory) {
-    }
+}
 
 
 //--AgentGen BEGIN=_TC_CLASSES_IMPORTED_MODULES_END
