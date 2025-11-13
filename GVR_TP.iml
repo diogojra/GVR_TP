@@ -11,5 +11,7 @@
     <orderEntry type="library" name="agp-5.4.0" level="project" />
     <orderEntry type="library" name="snmp4j-3.9.6" level="project" />
     <orderEntry type="library" name="snmp4j-agent-3.8.2" level="project" />
+    <orderEntry type="library" name="java1" level="project" />
+    <orderEntry type="library" name="java2" level="project" />
   </component>
 </module>
