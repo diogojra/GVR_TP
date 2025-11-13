@@ -222,13 +222,13 @@ public class GVRTPMIBG1
         laneEntryColumns[idxSemaphoreColor] =
                 moFactory.createColumn(colSemaphoreColor,
                         SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
                         tcModuleGvrtpmibg1,
                         tcDefSemaphoreColor);
         laneEntryColumns[idxTimeToChange] =
                 moFactory.createColumn(colTimeToChange,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxCapacity] =
                 moFactory.createColumn(colCapacity,
                         SMIConstants.SYNTAX_INTEGER32,
@@ -236,15 +236,15 @@ public class GVRTPMIBG1
         laneEntryColumns[idxRgt] =
                 moFactory.createColumn(colRgt,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxTotalVeh] =
                 moFactory.createColumn(colTotalVeh,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxViaterminal] =
                 moFactory.createColumn(colViaterminal,
                         SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         // Table model
         laneEntryModel =
                 moFactory.createTableModel(oidLaneEntry,
@@ -693,7 +693,16 @@ public void initializeSampleData() {
 
         readLaneDataFromCSV("lanes.txt");
         readViaDestDataFromCSV("viasdestino.txt");
-
+        addLaneEntryRow(
+                10,                      // laneID
+                5,                       // vehicleCount
+                SemaphoreColor.green,    // semaphoreColor = 1 (green)
+                30,                      // timeToChange
+                20,                      // capacity
+                3,                       // rgt
+                100,                     // totalVeh
+                ViaterminalEnum.truth    // viaterminal = 1 (true)
+        );
         System.out.println("Sample data initialized successfully from files");
     } catch (Exception e) {
         System.err.println("Error initializing sample data: " + e.getMessage());
