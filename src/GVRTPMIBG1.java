@@ -69,7 +69,6 @@ public class GVRTPMIBG1
     private static final String TC_MODULE_GVRTPMIBG1 = "GVRTPMIBG1";
     private static final String TC_SEMAPHORECOLOR = "SemaphoreColor";
 
-
     // Scalars
 
     // Tables
@@ -121,7 +120,6 @@ public class GVRTPMIBG1
     // Column TC definitions for viaDestEntry:
 
     // Column sub-identifier definitions for viaDestEntry:
-    
     public static final int colDestVia = 2;
     public static final int colFluxoDest = 3;
 
