@@ -217,8 +217,8 @@ public class GVRTPMIBG1
         MOColumn[] laneEntryColumns = new MOColumn[7];
         laneEntryColumns[idxVehicleCount] =
                 moFactory.createColumn(colVehicleCount,
-                        SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
+                        SMIConstants.SYNTAX_GAUGE32,
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
         laneEntryColumns[idxSemaphoreColor] =
                 moFactory.createColumn(colSemaphoreColor,
                         SMIConstants.SYNTAX_INTEGER,
@@ -351,13 +351,13 @@ public class GVRTPMIBG1
             //--AgentGen END
         }
 
-        public Integer32 getVehicleCount() {
+        public Gauge32 getVehicleCount() {
             //--AgentGen BEGIN=laneEntry::getVehicleCount
             //--AgentGen END
-            return (Integer32) super.getValue(idxVehicleCount);
+            return (Gauge32) super.getValue(idxVehicleCount);
         }
 
-        public void setVehicleCount(Integer32 newColValue) {
+        public void setVehicleCount(Gauge32 newColValue) {
             //--AgentGen BEGIN=laneEntry::setVehicleCount
             //--AgentGen END
             super.setValue(idxVehicleCount, newColValue);
@@ -463,7 +463,7 @@ public class GVRTPMIBG1
             //--AgentGen END
             switch(column) {
                 case idxVehicleCount:
-                    setVehicleCount((Integer32) value);
+                    setVehicleCount((Gauge32)value);
                     break;
                 case idxSemaphoreColor:
                     setSemaphoreColor((Integer32)value);
@@ -750,7 +750,7 @@ public void initializeSampleData() {
         OID index = new OID(new int[] { laneID });
         Variable[] values = new Variable[7];
 
-        values[0] = new Integer32(vehicleCount);      // VehicleCount
+        values[0] = new Gauge32(vehicleCount);      // VehicleCount
         values[1] = new Integer32(semaphoreColor);  // SemaphoreColor (1=green, 2=yellow, 3=red)
         values[2] = new Integer32(timeToChange);    // TimeToChange
         values[3] = new Integer32(capacity);        // Capacity

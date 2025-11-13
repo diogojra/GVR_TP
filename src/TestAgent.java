@@ -26,7 +26,7 @@ public class TestAgent {
         // Testar OIDs específicos
         testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 1");
         testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.3.1", "SemaphoreColor lane 1");
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.2", "VehicleCount lane 2");
+        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 2");
 
         // Fazer walk na tabela laneEntry
         System.out.println("\n=== TABELA laneEntry ===");
@@ -34,9 +34,6 @@ public class TestAgent {
 
         System.out.println("\n=== TABELA viaDestEntry ===");
         walkTable(snmp, target, "1.3.6.1.3.2025.1.2.1");
-
-        System.out.println("=== SET VehicleCount lane 1 ===");
-        setOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", 42, "Set VehicleCount lane 1 to 42");
 
         snmp.close();
     }
@@ -103,28 +100,6 @@ public class TestAgent {
             }
         } catch (Exception e) {
             System.out.println("Exception no walk: " + e.getMessage());
-        }
-    }
-    private static void setOID(Snmp snmp, Target target, String oid, int value, String description) {
-        try {
-            PDU pdu = new PDU();
-            pdu.add(new VariableBinding(new OID(oid), new Integer32(value)));
-            pdu.setType(PDU.SET);
-
-            ResponseEvent response = snmp.send(pdu, target);
-            if (response != null && response.getResponse() != null) {
-                PDU responsePDU = response.getResponse();
-                if (responsePDU.getErrorStatus() == PDU.noError) {
-                    VariableBinding vb = responsePDU.get(0);
-                    System.out.println(description + " (" + oid + "): " + vb.getVariable());
-                } else {
-                    System.out.println(description + ": ERRO - " + responsePDU.getErrorStatusText());
-                }
-            } else {
-                System.out.println(description + ": Sem resposta");
-            }
-        } catch (Exception e) {
-            System.out.println(description + ": Exception - " + e.getMessage());
         }
     }
 }
