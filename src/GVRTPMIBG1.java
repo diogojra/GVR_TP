@@ -1,5 +1,3 @@
-
-
 //--AgentGen BEGIN=_BEGIN
 //--AgentGen END
 
@@ -71,6 +69,15 @@ public class GVRTPMIBG1
 
 
     // Scalars
+    // Variáveis para armazenar os objetos escalares
+    private MOScalar sysUpTime;
+    private MOScalar sysStepTime;
+
+    public static final OID oidsysUpTime =
+            new OID(new int[] { 1,3,6,1,3,2025,1,3 });
+    public static final OID oidsysStepTime =
+            new OID(new int[] { 1,3,6,1,3,2025,1,4 });
+
 
     // Tables
     public static final OID oidLaneEntry =
