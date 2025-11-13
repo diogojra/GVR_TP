@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bc1cf6fb-1832-4b73-b26e-252e2c4b5250" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/TestAgent2.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GVRTPMIBG1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GVRTPMIBG1.java" afterDir="false" />
-    </list>
+    <list default="true" id="bc1cf6fb-1832-4b73-b26e-252e2c4b5250" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -104,7 +101,7 @@
       <workItem from="1762429718397" duration="3208000" />
       <workItem from="1762957190501" duration="6295000" />
       <workItem from="1762973164867" duration="2916000" />
-      <workItem from="1763025162243" duration="11394000" />
+      <workItem from="1763025162243" duration="11728000" />
     </task>
     <servers />
   </component>
