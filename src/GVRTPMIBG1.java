@@ -121,7 +121,9 @@ public class GVRTPMIBG1
     // Column TC definitions for viaDestEntry:
 
     // Column sub-identifier definitions for viaDestEntry:
-    
+
+
+
     public static final int colDestVia = 2;
     public static final int colFluxoDest = 3;
 
@@ -136,6 +138,19 @@ public class GVRTPMIBG1
             MOColumn,
             MOTableModel<ViaDestEntryRow>> viaDestEntry;
     private MOTableModel<ViaDestEntryRow> viaDestEntryModel;
+
+
+
+    public static final OID oidSysUpTime =
+            new OID(new int[] { 1,3,6,1,3,2025,1,3,0 });
+    public static final OID oidSysStepTime =
+            new OID(new int[] { 1,3,6,1,3,2025,1,4,0 });
+
+    private MOScalar<TimeTicks>  sysUpTime;
+    private MOScalar<Integer32>  sysStepTime;
+
+
+
 
 
 //--AgentGen BEGIN=_MEMBERS
@@ -185,7 +200,9 @@ public class GVRTPMIBG1
         addTCsToFactory(moFactory);
         createLaneEntry(moFactory);
         createViaDestEntry(moFactory);
+        createScalars(moFactory);
     }
+
 
 
 
@@ -314,21 +331,43 @@ public class GVRTPMIBG1
     }
 
 
+    private void createScalars(MOFactory moFactory) {
+        // sysUpTime: read-only, começa a 0 (o SD/Agent pode ir atualizando)
+        sysUpTime = new MOScalar<>(
+                oidSysUpTime,
+                moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                new TimeTicks(0)
+        );
+
+        // sysStepTime: por exemplo passo de simulação em ms, read-write
+        sysStepTime = new MOScalar<>(
+                oidSysStepTime,
+                moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                new Integer32(1000)   // valor inicial (podes mudar)
+        );
+    }
+
 
     public void registerMOs(MOServer server, OctetString context)
             throws DuplicateRegistrationException
     {
-        // Scalar Objects
+        //Tabela
         server.register(this.laneEntry, context);
         server.register(this.viaDestEntry, context);
+        // Scalar
+        server.register(sysUpTime, context);
+        server.register(sysStepTime, context);
 //--AgentGen BEGIN=_registerMOs
 //--AgentGen END
     }
 
     public void unregisterMOs(MOServer server, OctetString context) {
-        // Scalar Objects
+        // Tabela
         server.unregister(this.laneEntry, context);
         server.unregister(this.viaDestEntry, context);
+        // Scalar
+        server.unregister(sysUpTime, context);
+        server.unregister(sysStepTime, context);
 //--AgentGen BEGIN=_unregisterMOs
 //--AgentGen END
     }

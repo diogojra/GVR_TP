@@ -57,8 +57,6 @@ public class Agent implements VariableProvider {
     public Agent(Map args) {
         configFile = (String)((List)args.get("c")).get(0);
         bootCounterFile = new File((String)((List)args.get("bc")).get(0));
-
-        server = new DefaultMOServer();
         MOServer[] moServers = new MOServer[] { server };
         InputStream configInputStream =
                 Agent.class.getResourceAsStream("AgentConfig.properties");
