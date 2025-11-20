@@ -133,6 +133,9 @@ public class SSFR implements Runnable {
         for (Integer termId : level0) {
             GVRTPMIBG1.LaneEntryRow termLane = laneMap.get(termId);
             if (termLane == null) continue;
+            int color = termLane.getSemaphoreColor().getValue();
+            boolean open = (color == 1 || color == 2); // 1=verde, 2=amarelo
+            if (!open) continue;
             int vehicles = (int) termLane.getVehicleCount().getValue();
             if (vehicles <= 0) continue;
             // escoar tudo
@@ -182,46 +185,80 @@ public class SSFR implements Runnable {
                 int remaining = originVehicles;
                 int movedTotal = 0;
 
-                // distribuir para cada destino proporcionalmente ao fluxo
-                for (int i = 0; i < outs.size(); i++) {
-                    GVRTPMIBG1.ViaDestEntryRow d = outs.get(i);
+                List<GVRTPMIBG1.ViaDestEntryRow> candidates = new ArrayList<>(outs);
+
+// 1) Prioridade opcional: se existir destino 3, tenta enviar para ele primeiro
+                GVRTPMIBG1.ViaDestEntryRow toThree = null;
+                for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
+                    if (d.getDestVia().getValue() == 3) { // ajuste o ID conforme necessário
+                        toThree = d;
+                        break;
+                    }
+                }
+                if (toThree != null && remaining > 0) {
+                    int destId = toThree.getDestVia().getValue();
+                    GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
+                    if (destLane != null) {
+                        int destVehicles = (int) destLane.getVehicleCount().getValue();
+                        int destCapacity = destLane.getCapacity().getValue();
+                        int freeSpace = destCapacity - destVehicles;
+                        if (freeSpace > 0) {
+                            int toMove = Math.min(freeSpace, remaining);
+                            destLane.setVehicleCount(new Gauge32(destVehicles + toMove));
+                            remaining -= toMove;
+                            movedTotal += toMove;
+                        }
+                    }
+                    // Remove o 3 dos candidatos para não contar duas vezes
+                    candidates.remove(toThree);
+                }
+
+// 2) Ordena os demais destinos por capacidade disponível e razão de ocupação
+                candidates.sort((a, b) -> {
+                    int ad = a.getDestVia().getValue();
+                    int bd = b.getDestVia().getValue();
+                    GVRTPMIBG1.LaneEntryRow la = laneMap.get(ad);
+                    GVRTPMIBG1.LaneEntryRow lb = laneMap.get(bd);
+                    if (la == null && lb == null) return 0;
+                    if (la == null) return 1;
+                    if (lb == null) return -1;
+
+                    int av = (int) la.getVehicleCount().getValue();
+                    int ac = la.getCapacity().getValue();
+                    int bv = (int) lb.getVehicleCount().getValue();
+                    int bc = lb.getCapacity().getValue();
+
+                    int afree = Math.max(0, ac - av);
+                    int bfree = Math.max(0, bc - bv);
+                    if (afree != bfree) return Integer.compare(bfree, afree); // mais espaço primeiro
+
+                    double ar = (ac > 0) ? (afree / (double) ac) : 0.0;
+                    double br = (bc > 0) ? (bfree / (double) bc) : 0.0;
+                    return Double.compare(br, ar);
+                });
+
+// 3) Distribuição gulosa restante
+                for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
+                    if (remaining <= 0) break;
+
                     int destId = d.getDestVia().getValue();
                     GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
-                    if (destLane == null) {
-                        // destino inválido - ignora
-                        continue;
-                    }
+                    if (destLane == null) continue;
 
                     int destVehicles = (int) destLane.getVehicleCount().getValue();
                     int destCapacity = destLane.getCapacity().getValue();
                     int freeSpace = destCapacity - destVehicles;
                     if (freeSpace <= 0) continue;
 
-                    int fluxo = d.getFluxoDest().getValue();
-                    if (fluxo <= 0) continue;
-
-                    int toMove;
-                    if (i < outs.size() - 1) {
-                        int desired = originVehicles * fluxo / totalFluxo;
-                        if (desired <= 0) desired = 1;
-                        toMove = Math.min(desired, Math.min(freeSpace, remaining));
-                    } else {
-                        // último destino recebe o que resta
-                        toMove = Math.min(freeSpace, remaining);
-                    }
-
+                    int toMove = Math.min(freeSpace, remaining);
                     if (toMove <= 0) continue;
 
-                    // atualiza destino
                     destLane.setVehicleCount(new Gauge32(destVehicles + toMove));
-
                     remaining -= toMove;
                     movedTotal += toMove;
-
-                    if (remaining <= 0) break;
                 }
 
-                // atualizar origem (reduzir veículos que saíram) e totalVeh da origem
+// 4) Atualiza a origem
                 if (movedTotal > 0) {
                     lane.setVehicleCount(new Gauge32(originVehicles - movedTotal));
                     int totalVeh = lane.getTotalVeh().getValue();

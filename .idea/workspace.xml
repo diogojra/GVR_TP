@@ -4,22 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SSFRVisualizer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/TrafficPanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/agp_5_4_0.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/java.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/java1.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/java2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_3_9_6.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_2.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="VISUAL LANES">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GVR_TP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/GVR_TP.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,11 +103,24 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1763637456208</updated>
-      <workItem from="1763637457371" duration="5078000" />
+      <workItem from="1763637457371" duration="5895000" />
     </task>
+    <task id="LOCAL-00001" summary="VISUAL LANES">
+      <option name="closed" value="true" />
+      <created>1763642676367</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1763642676367</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="VISUAL LANES" />
+    <option name="LAST_COMMIT_MESSAGE" value="VISUAL LANES" />
   </component>
 </project>
