@@ -209,6 +209,13 @@ public class GVRTPMIBG1
     public MOTable<LaneEntryRow,MOColumn,MOTableModel<LaneEntryRow>> getLaneEntry() {
         return laneEntry;
     }
+    public MOScalar<TimeTicks> getSysUpTime() {
+        return sysUpTime;
+    }
+
+    public MOScalar<Integer32> getSysStepTime() {
+        return sysStepTime;
+    }
 
 
     @SuppressWarnings(value={"unchecked"})
@@ -237,33 +244,33 @@ public class GVRTPMIBG1
         laneEntryColumns[idxVehicleCount] =
                 moFactory.createColumn(colVehicleCount,
                         SMIConstants.SYNTAX_GAUGE32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxSemaphoreColor] =
                 moFactory.createColumn(colSemaphoreColor,
                         SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
                         tcModuleGvrtpmibg1,
                         tcDefSemaphoreColor);
         laneEntryColumns[idxTimeToChange] =
                 moFactory.createColumn(colTimeToChange,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxCapacity] =
                 moFactory.createColumn(colCapacity,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxRgt] =
                 moFactory.createColumn(colRgt,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxTotalVeh] =
                 moFactory.createColumn(colTotalVeh,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         laneEntryColumns[idxViaterminal] =
                 moFactory.createColumn(colViaterminal,
                         SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
         // Table model
         laneEntryModel =
                 moFactory.createTableModel(oidLaneEntry,
@@ -602,6 +609,8 @@ public class GVRTPMIBG1
                     return super.getValue(column);
             }
         }
+
+
 
         public void setValue(int column, Variable value) {
             //--AgentGen BEGIN=viaDestEntry::RowSetValue

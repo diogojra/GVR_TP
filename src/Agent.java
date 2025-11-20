@@ -55,6 +55,9 @@ public class Agent implements VariableProvider {
 
  
     public Agent(Map args) {
+
+        server = new DefaultMOServer();
+
         configFile = (String)((List)args.get("c")).get(0);
         bootCounterFile = new File((String)((List)args.get("bc")).get(0));
         MOServer[] moServers = new MOServer[] { server };
@@ -146,11 +149,16 @@ public class Agent implements VariableProvider {
         try {
             modules.registerMOs(server, null);
 
+            GVRTPMIBG1 mib = modules.getGvrtpmibg1();
+
             // ADD THIS LINE to initialize sample data
             modules.getGvrtpmibg1().initializeSampleData();
 
             //|:AgenPro:|=registerOtherContexts
             //|AgenPro:|
+            Thread ssfrThread = new Thread(new SSFR(mib), "SSFR");
+            ssfrThread.setDaemon(true);
+            ssfrThread.start();
         }
         catch (DuplicateRegistrationException drex) {
             logger.error("Duplicate registration: "+drex.getMessage()+"."+
