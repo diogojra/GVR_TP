@@ -6,13 +6,12 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import java.io.IOException;
 
 public class TestAgent {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         // Configurar o SNMP
         TransportMapping transport = new DefaultUdpTransportMapping();
         Snmp snmp = new Snmp(transport);
         transport.listen();
 
-        // Endereço do agente
         Address targetAddress = new UdpAddress("127.0.0.1/555");
         CommunityTarget target = new CommunityTarget();
         target.setCommunity(new OctetString("public"));
@@ -21,19 +20,22 @@ public class TestAgent {
         target.setTimeout(1500);
         target.setVersion(SnmpConstants.version2c);
 
-        System.out.println("=== TESTANDO MIB GvrTpMibG1 ===");
+        System.out.println("=== MONITORIZAR SSFR ===");
 
-        // Testar OIDs específicos
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 1");
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.3.1", "SemaphoreColor lane 1");
-        testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 2");
+        for (int t = 0; t < 30; t++) {   // 30 次，每秒一次
+            System.out.println("\n--- Tick " + t + " ---");
 
-        // Fazer walk na tabela laneEntry
-        System.out.println("\n=== TABELA laneEntry ===");
-        walkTable(snmp, target, "1.3.6.1.3.2025.1.1.1");
+            // 看每条 lane 的队列 / 流量 / 颜色
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.1", "VehicleCount lane 1");
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.6.1", "Queue lane 1");
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.3.1", "Color lane 1");
 
-        System.out.println("\n=== TABELA viaDestEntry ===");
-        walkTable(snmp, target, "1.3.6.1.3.2025.1.2.1");
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.2.2", "VehicleCount lane 2");
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.6.2", "Queue lane 2");
+            testOID(snmp, target, "1.3.6.1.3.2025.1.1.1.3.2", "Color lane 2");
+
+            Thread.sleep(5000); // 等 1 秒，看下一次
+        }
 
         snmp.close();
     }

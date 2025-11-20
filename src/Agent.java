@@ -159,6 +159,11 @@ public class Agent implements VariableProvider {
             Thread ssfrThread = new Thread(new SSFR(mib), "SSFR");
             ssfrThread.setDaemon(true);
             ssfrThread.start();
+
+            Thread sdThread = new Thread(new SD(mib), "SD");
+            sdThread.setDaemon(true);
+            sdThread.start();
+
         }
         catch (DuplicateRegistrationException drex) {
             logger.error("Duplicate registration: "+drex.getMessage()+"."+
