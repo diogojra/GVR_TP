@@ -30,6 +30,8 @@ import org.snmp4j.agent.mo.snmp.TimeStamp;
 import org.snmp4j.agent.mo.MOMutableTableRow;
 import org.snmp4j.agent.mo.MOFactory;
 
+import javax.swing.*;
+
 //|:AgenPro|=import
 //|AgenPro:|
 
@@ -49,7 +51,8 @@ public class Agent implements VariableProvider {
     protected MOServer server;
     private String configFile;
     private File bootCounterFile;
-
+    private GVRTPMIBG1 gvrtpmibg1;
+    private static Agent AGENT_INSTANCE;
     // supported MIBs
     protected Modules modules;
 
@@ -90,6 +93,11 @@ public class Agent implements VariableProvider {
                 new DefaultMOPersistenceProvider(moServers,
                         configFile),
                 new EngineBootsCounterFile(bootCounterFile));
+        AGENT_INSTANCE = this;
+    }
+
+    public GVRTPMIBG1 getGvrtpmibg1() {
+        return gvrtpmibg1;
     }
 
     protected void addListenAddresses(MessageDispatcher md, List addresses) {
@@ -150,7 +158,7 @@ public class Agent implements VariableProvider {
             modules.registerMOs(server, null);
 
             GVRTPMIBG1 mib = modules.getGvrtpmibg1();
-
+            this.gvrtpmibg1 = mib;
             // ADD THIS LINE to initialize sample data
             modules.getGvrtpmibg1().initializeSampleData();
 
@@ -324,11 +332,17 @@ public class Agent implements VariableProvider {
     public static void main(String[] args) {
         //|:AgenPro|=main
 
-
-
-
-
         defaultMain(args);
+        SwingUtilities.invokeLater(() -> {
+            // Verifica se a MIB já foi inicializada (depois de defaultMain)
+            if (AGENT_INSTANCE != null && AGENT_INSTANCE.getGvrtpmibg1() != null) {
+                GVRTPMIBG1 mib = AGENT_INSTANCE.getGvrtpmibg1();
+                SSFRVisualizer visualizer = new SSFRVisualizer(mib);
+                visualizer.start();
+            } else {
+                System.err.println("Erro: MIB não inicializada antes de tentar iniciar o visualizador.");
+            }
+        });
         //|AgenPro:|
     }
 }
