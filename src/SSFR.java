@@ -68,8 +68,14 @@ public class SSFR implements Runnable {
 
         // 3) Identificar vias terminais: lanes que NÃO têm entradas em destMap (ou seja, sem destinos)
         Set<Integer> terminals = new HashSet<>();
-        for (Integer laneId : laneMap.keySet()) {
-            if (!destMap.containsKey(laneId) || destMap.get(laneId).isEmpty()) {
+
+        for (GVRTPMIBG1.LaneEntryRow lane : laneMap.values()) {
+            // ATENÇÃO: Verifique se o nome do metodo no seu GVRTPMIBG1 é 'getViaTerminal' ou 'getViaterminal'
+            // O valor esperado é Integer32.
+            int isTerminal = lane.getViaterminal().getValue();
+
+            if (isTerminal == 1) {
+                int laneId = lane.getIndex().last();
                 terminals.add(laneId);
             }
         }
@@ -186,56 +192,86 @@ public class SSFR implements Runnable {
                 int movedTotal = 0;
 
                 List<GVRTPMIBG1.ViaDestEntryRow> candidates = new ArrayList<>(outs);
+                Map<Integer, Double> weights = new HashMap<>();
+                double totalWeight = 0.0;
 
-// 1) Prioridade opcional: se existir destino 3, tenta enviar para ele primeiro
-                GVRTPMIBG1.ViaDestEntryRow toThree = null;
+// 1. Calcular o peso de cada candidato (Baseado na % livre)
                 for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
-                    if (d.getDestVia().getValue() == 3) { // ajuste o ID conforme necessário
-                        toThree = d;
-                        break;
-                    }
-                }
-                if (toThree != null && remaining > 0) {
-                    int destId = toThree.getDestVia().getValue();
+                    int destId = d.getDestVia().getValue();
                     GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
-                    if (destLane != null) {
+
+                    // Se a lane não existe, ignoramos
+                    if (destLane == null) continue;
+
+                    double currentVeh = destLane.getVehicleCount().getValue();
+                    double capacity = destLane.getCapacity().getValue();
+
+                    // Se capacidade for 0 ou estiver cheia, peso é 0
+                    if (capacity <= 0 || currentVeh >= capacity) {
+                        weights.put(destId, 0.0);
+                        continue;
+                    }
+
+                    // Cálculo da percentagem de ocupação
+                    double occupancyRate = currentVeh / capacity;
+
+                    // O peso é o inverso da ocupação (ex: 20% ocupado = 80% de peso/atratividade)
+                    // Isso atende ao requisito: "enviar mais para a que tem menos"
+                    double weight = 1.0 - occupancyRate;
+
+                    weights.put(destId, weight);
+                    totalWeight += weight;
+                }
+
+// Se não há destinos viáveis (todos cheios), não faz nada
+                if (totalWeight > 0) {
+
+                    // Vamos distribuir os veículos que temos na origem (remaining)
+                    int vehiclesToDistribute = remaining;
+
+                    for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
+                        // Se já acabaram os veículos da origem no meio do loop, para.
+                        if (remaining <= 0) break;
+
+                        int destId = d.getDestVia().getValue();
+                        Double weight = weights.get(destId);
+
+                        // Se peso é zero (via cheia), pula
+                        if (weight == null || weight <= 0.0) continue;
+
+                        GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
+
+                        // 2. Calcular a quota proporcional
+                        // Ex: Se tenho 10 carros e meu peso é 50% do total, devo receber 5 carros.
+                        double ratio = weight / totalWeight;
+                        int targetShare = (int) Math.round(vehiclesToDistribute * ratio);
+
+                        // Ajuste fino: Se o cálculo der 0 (por arredondamento), mas houver espaço e peso,
+                        // tentamos enviar pelo menos 1 para manter o fluxo.
+                        if (targetShare == 0 && remaining > 0) targetShare = 1;
+
+                        // 3. Respeitar limites físicos
                         int destVehicles = (int) destLane.getVehicleCount().getValue();
                         int destCapacity = destLane.getCapacity().getValue();
                         int freeSpace = destCapacity - destVehicles;
-                        if (freeSpace > 0) {
-                            int toMove = Math.min(freeSpace, remaining);
+
+                        // O que vamos mover é o MÍNIMO entre:
+                        // a) A quota calculada (targetShare)
+                        // b) O espaço físico real na via destino (freeSpace)
+                        // c) O que ainda resta na origem (remaining)
+                        int toMove = Math.min(targetShare, freeSpace);
+                        toMove = Math.min(toMove, remaining);
+
+                        if (toMove > 0) {
                             destLane.setVehicleCount(new Gauge32(destVehicles + toMove));
                             remaining -= toMove;
                             movedTotal += toMove;
                         }
                     }
-                    // Remove o 3 dos candidatos para não contar duas vezes
-                    candidates.remove(toThree);
+
+                    // Nota: Como usamos inteiros, pode sobrar 1 ou 2 veículos devido a arredondamentos.
+                    // Eles ficarão na origem para o próximo ciclo (step), o que é aceitável.
                 }
-
-// 2) Ordena os demais destinos por capacidade disponível e razão de ocupação
-                candidates.sort((a, b) -> {
-                    int ad = a.getDestVia().getValue();
-                    int bd = b.getDestVia().getValue();
-                    GVRTPMIBG1.LaneEntryRow la = laneMap.get(ad);
-                    GVRTPMIBG1.LaneEntryRow lb = laneMap.get(bd);
-                    if (la == null && lb == null) return 0;
-                    if (la == null) return 1;
-                    if (lb == null) return -1;
-
-                    int av = (int) la.getVehicleCount().getValue();
-                    int ac = la.getCapacity().getValue();
-                    int bv = (int) lb.getVehicleCount().getValue();
-                    int bc = lb.getCapacity().getValue();
-
-                    int afree = Math.max(0, ac - av);
-                    int bfree = Math.max(0, bc - bv);
-                    if (afree != bfree) return Integer.compare(bfree, afree); // mais espaço primeiro
-
-                    double ar = (ac > 0) ? (afree / (double) ac) : 0.0;
-                    double br = (bc > 0) ? (bfree / (double) bc) : 0.0;
-                    return Double.compare(br, ar);
-                });
 
 // 3) Distribuição gulosa restante
                 for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {

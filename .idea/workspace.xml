@@ -4,10 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="VISUAL LANES">
+    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="so escoa quando o semaforo esta verd">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lanes.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GVRTPMIBG1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GVRTPMIBG1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/viasdestino.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/viasdestino.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/viasdestino.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,21 +30,21 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "diogojra"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;diogojra&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/K0Kosuki/GVR_TP.git",
-    "accountId": "fc73373e-0746-44c9-bc4a-b458a4035e37"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/K0Kosuki/GVR_TP.git&quot;,
+    &quot;accountId&quot;: &quot;fc73373e-0746-44c9-bc4a-b458a4035e37&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 7
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
   <component name="ProjectId" id="35jxoLXF7KOJyaLCpd3YkmoZOse" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -47,6 +53,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.Agent.executor": "Run",
+    "Application.TestAgent.executor": "Run",
     "Application.TestAgent2.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
@@ -73,6 +80,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="TestAgent" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="TestAgent" />
+      <module name="GVR_TP" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="TestAgent2" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="TestAgent2" />
       <module name="GVR_TP" />
@@ -84,6 +98,7 @@
       <list>
         <item itemvalue="Application.Agent" />
         <item itemvalue="Application.TestAgent2" />
+        <item itemvalue="Application.TestAgent" />
       </list>
     </recent_temporary>
   </component>
@@ -103,7 +118,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1763637456208</updated>
-      <workItem from="1763637457371" duration="5895000" />
+      <workItem from="1763637457371" duration="6209000" />
+      <workItem from="1764176302021" duration="5650000" />
     </task>
     <task id="LOCAL-00001" summary="VISUAL LANES">
       <option name="closed" value="true" />
@@ -113,7 +129,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763642676367</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="so escoa quando o semaforo esta verd">
+      <option name="closed" value="true" />
+      <created>1763643506034</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1763643506038</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -121,6 +145,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="VISUAL LANES" />
-    <option name="LAST_COMMIT_MESSAGE" value="VISUAL LANES" />
+    <MESSAGE value="so escoa quando o semaforo esta verd" />
+    <option name="LAST_COMMIT_MESSAGE" value="so escoa quando o semaforo esta verd" />
   </component>
 </project>
