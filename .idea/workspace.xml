@@ -7,8 +7,6 @@
     <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="so escoa quando o semaforo esta verd">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/viasdestino.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/viasdestino.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +114,7 @@
       <updated>1763637456208</updated>
       <workItem from="1763637457371" duration="6209000" />
       <workItem from="1764176302021" duration="5650000" />
-      <workItem from="1764242809892" duration="703000" />
+      <workItem from="1764242809892" duration="1409000" />
     </task>
     <task id="LOCAL-00001" summary="VISUAL LANES">
       <option name="closed" value="true" />
