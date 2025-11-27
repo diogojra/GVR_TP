@@ -114,18 +114,15 @@ public class SD implements Runnable {
         lane.setTimeToChange(new Integer32(nextTime));
     }
 
-    /** Lógica INTELIGENTE para vias geradoras */
+
     /**
-     * Lógica INTELIGENTE para vias geradoras
-     */
-    /**
-     * Lógica INTELIGENTE para vias geradoras
+     * Lógica INTELIGENTE para vias geradoras (Troca Instantânea)
      */
     private void processGeneratorsGroup(List<GVRTPMIBG1.LaneEntryRow> generators, int stepMs) {
 
         GVRTPMIBG1.LaneEntryRow activeLane = null;
 
-        // 1. Identificar se alguém tem o sinal aberto (Verde ou Amarelo)
+        // 1. Procurar quem está ativo (Verde ou Amarelo)
         for (GVRTPMIBG1.LaneEntryRow lane : generators) {
             int color = lane.getSemaphoreColor().getValue();
             if (color == GREEN || color == YELLOW) {
@@ -134,103 +131,122 @@ public class SD implements Runnable {
             }
         }
 
-        // --- CENÁRIO A: Existe uma via ativa (o sistema está ocupado) ---
-        if (activeLane != null) {
+        // Se ninguém estiver ativo (ex: arranque do sistema), forçamos uma eleição imediata
+        if (activeLane == null) {
+            performElection(generators);
+            return;
+        }
 
-            // 1. Atualizar a Via Ativa (Verde/Amarelo)
-            int timeToChange = activeLane.getTimeToChange().getValue();
-            int color = activeLane.getSemaphoreColor().getValue();
-            int newTime = timeToChange - stepMs;
+        // 2. Processar a Via Ativa
+        int timeToChange = activeLane.getTimeToChange().getValue();
+        int color = activeLane.getSemaphoreColor().getValue();
 
-            if (newTime > 0) {
-                activeLane.setTimeToChange(new Integer32(newTime));
-            } else {
-                // Transição de estado da via ativa
-                if (color == GREEN) {
-                    activeLane.setSemaphoreColor(new Integer32(YELLOW));
-                    activeLane.setTimeToChange(new Integer32(YELLOW_TIME_MS));
-                } else if (color == YELLOW) {
-                    activeLane.setSemaphoreColor(new Integer32(RED));
-                    // Agora entra em período de segurança (Vermelho)
-                    activeLane.setTimeToChange(new Integer32(RED_TIME_MS));
-                }
+        int newTime = timeToChange - stepMs;
+
+        // Variáveis para sincronizar as vias em espera (Vermelhas)
+        int waitTimeForOthers = 0;
+        boolean cycleChanged = false; // Flag para saber se houve troca de sinal
+
+        if (newTime > 0) {
+            // A via continua no estado atual
+            activeLane.setTimeToChange(new Integer32(newTime));
+
+            // Calculamos quanto tempo as outras têm de esperar
+            if (color == GREEN) {
+                // Falta o resto do Verde + todo o Amarelo
+                waitTimeForOthers = newTime + YELLOW_TIME_MS;
+            } else { // YELLOW
+                // Falta apenas o resto do Amarelo
+                waitTimeForOthers = newTime;
             }
 
-            // 2. Atualizar as Outras Vias (Vermelhas) - Para não parecerem congeladas!
-            for (GVRTPMIBG1.LaneEntryRow lane : generators) {
-                if (lane == activeLane) continue; // Pula a ativa
+        } else {
+            // O tempo acabou! Transição de estado.
+            if (color == GREEN) {
+                // Verde -> Amarelo
+                activeLane.setSemaphoreColor(new Integer32(YELLOW));
+                activeLane.setTimeToChange(new Integer32(YELLOW_TIME_MS));
 
-                // Garante que está vermelha
-                int laneColor = lane.getSemaphoreColor().getValue();
-                if (laneColor != RED) {
+                // As outras esperam agora apenas o tempo do amarelo
+                waitTimeForOthers = YELLOW_TIME_MS;
+
+            } else if (color == YELLOW) {
+                // Amarelo -> Fim de Ciclo -> Troca Imediata
+
+                // 1. A via atual fecha (Vermelho) e prepara-se para esperar o ciclo completo
+                activeLane.setSemaphoreColor(new Integer32(RED));
+                activeLane.setTimeToChange(new Integer32(RED_TIME_MS));
+
+                // 2. Realizamos a eleição IMEDIATAMENTE para abrir a próxima
+                performElection(generators);
+                cycleChanged = true; // Marcamos que já tratámos de tudo na eleição
+            }
+        }
+
+        // 3. Atualizar as Vias em Espera (apenas se não houve troca de ciclo agora mesmo)
+        if (!cycleChanged) {
+            for (GVRTPMIBG1.LaneEntryRow lane : generators) {
+                if (lane == activeLane) continue; // Ignora a ativa
+
+                // Força estado Vermelho
+                if (lane.getSemaphoreColor().getValue() != RED) {
                     lane.setSemaphoreColor(new Integer32(RED));
                 }
 
-                // Decrementa o tempo de espera (efeito visual de contagem)
-                int t = lane.getTimeToChange().getValue();
-                if (t > 0) {
-                    int nextT = t - stepMs;
-                    if (nextT < 0) nextT = 0; // Não deixa ir negativo
-                    lane.setTimeToChange(new Integer32(nextT));
-                }
-                // Se chegar a 0, fica em 0 à espera da sua vez (comportamento correto)
+                // Sincroniza o tempo perfeitamente
+                // Se a via 1 tem 5s de Verde, a via 2 mostra 8s (5+3) de Vermelho.
+                lane.setTimeToChange(new Integer32(waitTimeForOthers));
             }
-
         }
-        // --- CENÁRIO B: Ninguém ativo (Tudo Vermelho -> Eleição ou Segurança) ---
-        else {
+    }
 
-            // 1. Verificar tempos de segurança ("All Red")
-            boolean waitingForSafetyTime = false;
+    /**
+     * Metodo auxiliar para escolher a próxima via Verde
+     */
+    private void performElection(List<GVRTPMIBG1.LaneEntryRow> generators) {
+        GVRTPMIBG1.LaneEntryRow bestCandidate = null;
+        double maxOccupancy = -1.0;
 
-            for (GVRTPMIBG1.LaneEntryRow lane : generators) {
-                int t = lane.getTimeToChange().getValue();
+        // Calcular quem precisa mais
+        for (GVRTPMIBG1.LaneEntryRow lane : generators) {
+            // Ignora quem acabou de fechar (ainda está marcado como Amarelo ou acabou de virar Vermelho na lógica acima)
+            // Mas num sistema de 2 vias, a que acabou de fechar vai ter ocupação alta se não esvaziou,
+            // contudo, a lógica do semáforo deve dar oportunidade à outra.
+            // (Neste código simplificado, quem tem mais % ganha, mesmo se for a mesma,
+            // mas assumimos que ao ficar verde ela esvaziou e a % baixou).
 
-                // Se alguma via ainda tem tempo de vermelho > 0, decrementamos e esperamos
-                if (t > 0) {
-                    int nextT = t - stepMs;
-                    if (nextT < 0) nextT = 0;
-                    lane.setTimeToChange(new Integer32(nextT));
+            int veiculos = (int) lane.getVehicleCount().getValue();
+            int capacidade = lane.getCapacity().getValue();
+            double occupancy = (capacidade > 0) ? (double) veiculos / capacidade : 0.0;
 
-                    if (nextT > 0) waitingForSafetyTime = true;
-                }
-            }
-
-            // Se ainda estamos no tempo de segurança de alguém, não fazemos eleição
-            if (waitingForSafetyTime) return;
-
-            // --- ELEIÇÃO: Escolher a próxima via a abrir ---
-            GVRTPMIBG1.LaneEntryRow bestCandidate = null;
-            double maxOccupancy = -1.0;
-
-            for (GVRTPMIBG1.LaneEntryRow lane : generators) {
-                int veiculos = (int) lane.getVehicleCount().getValue();
-                int capacidade = lane.getCapacity().getValue();
-
-                double occupancy = 0.0;
-                if (capacidade > 0) {
-                    occupancy = (double) veiculos / capacidade;
-                }
-
-                if (occupancy > maxOccupancy) {
-                    maxOccupancy = occupancy;
+            if (occupancy > maxOccupancy) {
+                maxOccupancy = occupancy;
+                bestCandidate = lane;
+            } else if (occupancy == maxOccupancy) {
+                // Desempate
+                if (bestCandidate != null && veiculos > bestCandidate.getVehicleCount().getValue()) {
                     bestCandidate = lane;
-                } else if (occupancy == maxOccupancy) {
-                    // Desempate: quem tiver mais veículos absolutos
-                    if (bestCandidate != null && veiculos > bestCandidate.getVehicleCount().getValue()) {
-                        bestCandidate = lane;
-                    }
                 }
             }
+        }
 
-            // Vencedor ganha o Verde
-            if (bestCandidate != null) {
-                bestCandidate.setSemaphoreColor(new Integer32(GREEN));
-                bestCandidate.setTimeToChange(new Integer32(GREEN_TIME_MS));
+        // Se, por acaso, a lista vier vazia ou null, pega o primeiro
+        if (bestCandidate == null && !generators.isEmpty()) {
+            bestCandidate = generators.get(0);
+        }
 
-                // As outras reiniciam o seu timer de "paciência" (opcional, ou mantêm-se a 0)
-                // Aqui mantemos a 0 ou resetamos para RED_TIME_MS se quisermos simular um ciclo completo.
-                // Mas deixar a 0 indica "Estou pronta".
+        // Aplicar as cores pós-eleição
+        if (bestCandidate != null) {
+            // O vencedor fica VERDE
+            bestCandidate.setSemaphoreColor(new Integer32(GREEN));
+            bestCandidate.setTimeToChange(new Integer32(GREEN_TIME_MS));
+
+            // Os perdedores ficam VERMELHOS com o tempo total (G+Y)
+            for (GVRTPMIBG1.LaneEntryRow lane : generators) {
+                if (lane != bestCandidate) {
+                    lane.setSemaphoreColor(new Integer32(RED));
+                    lane.setTimeToChange(new Integer32(RED_TIME_MS));
+                }
             }
         }
     }

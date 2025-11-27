@@ -7,13 +7,9 @@
     <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="so escoa quando o semaforo esta verd">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lanes.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GVRTPMIBG1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GVRTPMIBG1.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/viasdestino.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/viasdestino.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/viasdestino.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,28 +46,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Agent.executor": "Run",
-    "Application.TestAgent.executor": "Run",
-    "Application.TestAgent2.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "SDSSFR",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/arauj/OneDrive/Downloads/snmp4j-3.9.6.jar",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Libraries",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.2",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Agent.executor&quot;: &quot;Run&quot;,
+    &quot;Application.TestAgent.executor&quot;: &quot;Run&quot;,
+    &quot;Application.TestAgent2.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;SDSSFR&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/arauj/OneDrive/Downloads/snmp4j-3.9.6.jar&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Application.Agent">
     <configuration name="Agent" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Agent" />
@@ -120,6 +116,7 @@
       <updated>1763637456208</updated>
       <workItem from="1763637457371" duration="6209000" />
       <workItem from="1764176302021" duration="5650000" />
+      <workItem from="1764242809892" duration="703000" />
     </task>
     <task id="LOCAL-00001" summary="VISUAL LANES">
       <option name="closed" value="true" />
