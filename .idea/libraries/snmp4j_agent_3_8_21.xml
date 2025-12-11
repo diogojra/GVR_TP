@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="snmp4j-agent-3.8.21">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/snmp4j-agent-3.8.2.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/snmp4j-3.9.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

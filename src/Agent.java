@@ -337,8 +337,7 @@ public class Agent implements VariableProvider {
             // Verifica se a MIB já foi inicializada (depois de defaultMain)
             if (AGENT_INSTANCE != null && AGENT_INSTANCE.getGvrtpmibg1() != null) {
                 GVRTPMIBG1 mib = AGENT_INSTANCE.getGvrtpmibg1();
-                SSFRVisualizer visualizer = new SSFRVisualizer(mib);
-                visualizer.start();
+
             } else {
                 System.err.println("Erro: MIB não inicializada antes de tentar iniciar o visualizador.");
             }
