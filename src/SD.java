@@ -1,20 +1,24 @@
 import org.snmp4j.smi.Integer32;
 import java.util.*;
 
+/**
+   logic:
+   independent lanes follow a timed cycle (independent lanes are the ones with no interceptions)
+   intersections: Use a algorithm to choose a lane to prioritize certain lanes (most occupied)
+*/
 public class SD implements Runnable {
 
     private final GVRTPMIBG1 mib;
 
-    // Definição das cores
     private static final int GREEN = 1;
     private static final int YELLOW = 2;
     private static final int RED = 3;
 
-    // --- CONFIGURAÇÃO DE TEMPOS ---
+    // --- traffic light time configuration ---
     private static final int YELLOW_TIME_MS = 3000;
     private static final int GREEN_TIME_MS = 8000;
 
-    // O Vermelho é calculado (G + Y)
+    // Red needs to be a full cycle of green and yellow
     private static final int RED_TIME_MS = GREEN_TIME_MS + YELLOW_TIME_MS;
 
     public SD(GVRTPMIBG1 mib) {
@@ -27,6 +31,7 @@ public class SD implements Runnable {
             try {
                 runOneStep();
 
+                // Dynamic simulation speed: fetch the step delay from the MIB (currently its at 1000 ms)
                 int stepMs = mib.getSysStepTime().getValue().toInt();
                 if (stepMs <= 0) stepMs = 1000;
                 Thread.sleep(stepMs);
@@ -40,57 +45,47 @@ public class SD implements Runnable {
     }
 
     /**
-     * Ciclo principal
+     * Seperates independent lanes from the ones with interceptions
      */
     private void runOneStep() {
         var laneTable = mib.getLaneEntry();
         var laneModel = laneTable.getModel();
-
-        // Precisamos da tabela de conexões para saber quem intercepta quem
         var viaDestTable = mib.getViaDestEntry();
         var viaDestModel = viaDestTable.getModel();
 
         int stepMs = mib.getSysStepTime().getValue().toInt();
         if (stepMs <= 0) stepMs = 1000;
 
-        // 1. Mapear Topologia: Qual Lane vai para Qual Destino?
-        // Map<SourceLaneID, DestinationLaneID>
+        // Mapping of topology
+        // if multiple lanes feed into the same destination, an interception is formmed
         Map<Integer, Integer> laneToDestMap = new HashMap<>();
 
         for (Iterator<?> it = viaDestModel.iterator(); it.hasNext(); ) {
             GVRTPMIBG1.ViaDestEntryRow link = (GVRTPMIBG1.ViaDestEntryRow) it.next();
-            int sourceId = link.getIndex().get(1); // O índice da tabela é composto, parte 1 é a lane origem
+            int sourceId = link.getIndex().get(1);
             int destId = link.getDestVia().getValue();
-
-            // Assumimos que a lane geradora principal conflita no seu PRIMEIRO destino encontrado.
-            // (Em cenários simples, uma lane geradora entra em apenas 1 via ou interseção imediata)
             laneToDestMap.putIfAbsent(sourceId, destId);
         }
 
-        // 2. Agrupar Geradores por Destino Comum (Interseção)
-        // Map<IntersectionID, List<LaneObj>>
+        // Grouping lanes based on destination
         Map<Integer, List<GVRTPMIBG1.LaneEntryRow>> conflictGroups = new HashMap<>();
-
-        // Lista auxiliar para lanes que não são geradoras
         List<GVRTPMIBG1.LaneEntryRow> normalLanes = new ArrayList<>();
 
         for (Iterator<?> it = laneModel.iterator(); it.hasNext(); ) {
             GVRTPMIBG1.LaneEntryRow lane = (GVRTPMIBG1.LaneEntryRow) it.next();
             int rgt = lane.getRgt().getValue();
 
+            //identifying generating lanes
             if (rgt > 0) {
-                // É geradora. Descobre para onde ela vai.
                 int laneId = lane.getIndex().last();
                 Integer destination = laneToDestMap.get(laneId);
 
                 if (destination != null) {
-                    // Adiciona ao grupo daquela interseção (destino)
+                    // add lane to the group of interceptions for that destination
                     conflictGroups
                             .computeIfAbsent(destination, k -> new ArrayList<>())
                             .add(lane);
                 } else {
-                    // Se a lane geradora não tem destino configurado na ViaDestEntry,
-                    // ela é isolada. Criamos um grupo só para ela (ID negativo para não colidir).
                     conflictGroups
                             .computeIfAbsent(-laneId, k -> new ArrayList<>())
                             .add(lane);
@@ -100,19 +95,20 @@ public class SD implements Runnable {
             }
         }
 
-        // 3. Processar Vias Normais (sem lógica de conflito)
+        // Process normal lanes (fixed times)
         for (GVRTPMIBG1.LaneEntryRow lane : normalLanes) {
             processNormalLane(lane, stepMs);
         }
 
-        // 4. Processar Grupos de Conflito (Interseções) INDEPENDENTEMENTE
+        // Process interceptions
         for (List<GVRTPMIBG1.LaneEntryRow> group : conflictGroups.values()) {
             processGeneratorsGroup(group, stepMs);
         }
     }
 
     /**
-     * Lógica para vias normais
+     * Fixed cycle for normal lanes:
+     * Green -> Yellow -> Red -> Green
      */
     private void processNormalLane(GVRTPMIBG1.LaneEntryRow lane, int stepMs) {
         int color = lane.getSemaphoreColor().getValue();
@@ -150,21 +146,14 @@ public class SD implements Runnable {
 
 
     /**
-     * Lógica INTELIGENTE para um GRUPO ESPECÍFICO de geradores
-     * Se o grupo tiver apenas 1 lane, ela ficará sempre Verde (ou ciclará sozinha).
-     * Se tiver 3 lanes, elas disputarão entre si.
+     * Adaptive cycles for interception
+     * After a Green light time expires it goes trough a selection to see who needs the green light the most
      */
     private void processGeneratorsGroup(List<GVRTPMIBG1.LaneEntryRow> generators, int stepMs) {
-
         if (generators.isEmpty()) return;
 
-        // Se houver apenas 1 geradora neste grupo (isolada), forçamos Verde Constante
-        // para otimizar fluxo, ou deixamos ciclar se preferir realismo visual.
-        // Aqui: Deixamos ela ganhar a eleição sempre, mantendo-a verde.
-
+        // Identifies the current green light
         GVRTPMIBG1.LaneEntryRow activeLane = null;
-
-        // 1. Procurar quem está ativo neste grupo
         for (GVRTPMIBG1.LaneEntryRow lane : generators) {
             int color = lane.getSemaphoreColor().getValue();
             if (color == GREEN || color == YELLOW) {
@@ -173,13 +162,12 @@ public class SD implements Runnable {
             }
         }
 
-        // Caso especial: Inicialização ou falha anterior -> Força eleição
+        // If any of the lanes isnt green it goes directly to a selection process
         if (activeLane == null) {
             performElection(generators);
             return;
         }
 
-        // 2. Processar a Via Ativa
         int timeToChange = activeLane.getTimeToChange().getValue();
         int color = activeLane.getSemaphoreColor().getValue();
         int newTime = timeToChange - stepMs;
@@ -188,80 +176,78 @@ public class SD implements Runnable {
         boolean cycleChanged = false;
 
         if (newTime > 0) {
-            // Continua no estado atual
+            // Mantain current state
             activeLane.setTimeToChange(new Integer32(newTime));
 
             if (color == GREEN) {
                 waitTimeForOthers = newTime + YELLOW_TIME_MS;
-            } else { // YELLOW
+            } else {
                 waitTimeForOthers = newTime;
             }
         } else {
-            // O tempo acabou! Transição.
+            // Transition state
             if (color == GREEN) {
-                // Verde -> Amarelo
+                // Green -> Yellow
                 activeLane.setSemaphoreColor(new Integer32(YELLOW));
                 activeLane.setTimeToChange(new Integer32(YELLOW_TIME_MS));
                 waitTimeForOthers = YELLOW_TIME_MS;
             } else if (color == YELLOW) {
-                // Amarelo -> Fim -> Vermelho
+                // Yellow -> Red
                 activeLane.setSemaphoreColor(new Integer32(RED));
                 activeLane.setTimeToChange(new Integer32(RED_TIME_MS));
 
-                // Eleição IMEDIATA para abrir a próxima
+                // Cycle ended, perform new election
                 performElection(generators);
                 cycleChanged = true;
             }
         }
 
-        // 3. Atualizar as Vias em Espera (apenas se não houve troca de ciclo agora)
+        // Enforce the selection on all lanes
         if (!cycleChanged) {
             for (GVRTPMIBG1.LaneEntryRow lane : generators) {
                 if (lane == activeLane) continue;
 
-                // Força Vermelho nas outras
+                // Red for any lane that wasnt selected
                 if (lane.getSemaphoreColor().getValue() != RED) {
                     lane.setSemaphoreColor(new Integer32(RED));
                 }
-
-                // Sincroniza tempo de espera
                 lane.setTimeToChange(new Integer32(waitTimeForOthers));
             }
         }
     }
-
-    private void performElection(List<GVRTPMIBG1.LaneEntryRow> generators) {
+    /**
+     * The Election Algorithm:
+     * Calculates occupancy (Vehicles / Capacity) for all competing lanes.
+     * The lane with the highest saturation ratio wins the Green light.
+    */
+     private void performElection(List<GVRTPMIBG1.LaneEntryRow> generators) {
         GVRTPMIBG1.LaneEntryRow bestCandidate = null;
         double maxOccupancy = -1.0;
 
-        // Calcular quem precisa mais
         for (GVRTPMIBG1.LaneEntryRow lane : generators) {
             int veiculos = (int) lane.getVehicleCount().getValue();
             int capacidade = lane.getCapacity().getValue();
+            // Saturation metric = V / C
             double occupancy = (capacidade > 0) ? (double) veiculos / capacidade : 0.0;
 
             if (occupancy > maxOccupancy) {
                 maxOccupancy = occupancy;
                 bestCandidate = lane;
             } else if (occupancy == maxOccupancy) {
-                // Desempate por quantidade absoluta
+                // If both have equal saturations then its decided based on vehicle count
                 if (bestCandidate != null && veiculos > bestCandidate.getVehicleCount().getValue()) {
                     bestCandidate = lane;
                 }
             }
         }
 
-        // Se der null (ex: lista vazia), pega o primeiro
-        if (bestCandidate == null && !generators.isEmpty()) {
-            bestCandidate = generators.get(0);
-        }
 
         if (bestCandidate != null) {
-            // O vencedor fica VERDE
+            // The lane selected goes Green
             bestCandidate.setSemaphoreColor(new Integer32(GREEN));
             bestCandidate.setTimeToChange(new Integer32(GREEN_TIME_MS));
 
-            // Os perdedores (do mesmo grupo) ficam VERMELHOS
+            // The not chosen ones go Red
             for (GVRTPMIBG1.LaneEntryRow lane : generators) {
                 if (lane != bestCandidate) {
                     lane.setSemaphoreColor(new Integer32(RED));

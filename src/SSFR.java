@@ -7,14 +7,14 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.TimeTicks;
 
 /**
- * SSFR reformulado:
- * - encontra vias terminais (vias sem destinos),
- * - escoa completamente veículos nas terminais,
- * - processa níveis ascendentes (predecessores) e propaga tráfego conforme semáforo + fluxoDest,
- * - injeta RGT nas vias origem no fim.
+ * SSFR reformulated:
+ * - finds terminal lanes ( lanes without destination ),
+ * - drains the vehicles in the terminal lane
+ * - processes the level before and depending on the traffic light and destinationflux it sends the vehicles,
+ * - injects the vehicles in the rgt lanes.
  */
-public class SSFR implements Runnable {
 
+public class SSFR implements Runnable {
     private final GVRTPMIBG1 mib;
 
     public SSFR(GVRTPMIBG1 mib) {
@@ -27,6 +27,7 @@ public class SSFR implements Runnable {
             try {
                 runOneStep();
 
+                // Dynamic simulation speed: fetch the step delay from the MIB (currently its at 1000 ms)
                 int stepMs = mib.getSysStepTime().getValue().toInt();
                 if (stepMs <= 0) stepMs = 1000;
                 Thread.sleep(stepMs);
@@ -39,14 +40,13 @@ public class SSFR implements Runnable {
     }
 
     private void runOneStep() {
-        // Carregar tabelas
+        // Fetch current mib state
         MOTable<?, ?, ?> laneTable = mib.getLaneEntry();
         MOTableModel<?> laneModel = laneTable.getModel();
-
         MOTable<?, ?, ?> viaTable = mib.getViaDestEntry();
         MOTableModel<?> viaModel = viaTable.getModel();
 
-        // 1) Mapear lanes: id -> LaneEntryRow
+        // Map for a direct lookup for lanes
         Map<Integer, GVRTPMIBG1.LaneEntryRow> laneMap = new HashMap<>();
         for (Iterator<?> it = laneModel.iterator(); it.hasNext(); ) {
             GVRTPMIBG1.LaneEntryRow row = (GVRTPMIBG1.LaneEntryRow) it.next();
@@ -54,9 +54,9 @@ public class SSFR implements Runnable {
             laneMap.put(laneId, row);
         }
 
-        // 2) Construir grafo de destinos (orig -> list(destRow)) e grafo reverso (dest -> list(orig))
+        // Build the Network  Graph (orig -> list(destRow)) e reverse (dest -> list(orig))
         Map<Integer, List<GVRTPMIBG1.ViaDestEntryRow>> destMap = new HashMap<>();
-        Map<Integer, List<Integer>> reverseMap = new HashMap<>(); // destId -> list(origId)
+        Map<Integer, List<Integer>> reverseMap = new HashMap<>();
         for (Iterator<?> it = viaModel.iterator(); it.hasNext(); ) {
             GVRTPMIBG1.ViaDestEntryRow row = (GVRTPMIBG1.ViaDestEntryRow) it.next();
             int origLaneId = row.getIndex().get(1);
@@ -66,14 +66,10 @@ public class SSFR implements Runnable {
             reverseMap.computeIfAbsent(destId, k -> new ArrayList<>()).add(origLaneId);
         }
 
-        // 3) Identificar vias terminais: lanes que NÃO têm entradas em destMap (ou seja, sem destinos)
+        // Identify terminal lane
         Set<Integer> terminals = new HashSet<>();
-
         for (GVRTPMIBG1.LaneEntryRow lane : laneMap.values()) {
-            // ATENÇÃO: Verifique se o nome do metodo no seu GVRTPMIBG1 é 'getViaTerminal' ou 'getViaterminal'
-            // O valor esperado é Integer32.
             int isTerminal = lane.getViaterminal().getValue();
-
             if (isTerminal == 1) {
                 int laneId = lane.getIndex().last();
                 terminals.add(laneId);
