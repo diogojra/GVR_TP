@@ -31,6 +31,7 @@ public class TestAgent2 extends JFrame {
     private JComboBox<String> cmbOperations;
     private JComboBox<String> cmbVariables;
     private JTextField txtIndex, txtValue;
+    private JTextField txtCommunity;
     private JTextArea logArea;
     private JButton btnExecute;
     private LayeredGraphPanel topologyPanel;
@@ -46,8 +47,9 @@ public class TestAgent2 extends JFrame {
 
     // 1. MIB STRUCTURE
     private void initMibDictionary() {
-        mibDictionary.put(">> ENTIRE MIB (Walk All) <<", new MibNode("", false, true));
+        mibDictionary.put(">> ENTIRE MIB (WALK All) <<", new MibNode("", false, true));
         mibDictionary.put("System: Up Time (.1.3.0)",        new MibNode(".1.3.0", false, false));
+        mibDictionary.put("System: Step Time (.1.4.0)",        new MibNode(".1.4.0", false, false));
 
         String laneBase = ".1.1.1";
         mibDictionary.put(">> [GET/SET] Lane Variable...", new MibNode(laneBase, true, false));
@@ -75,7 +77,10 @@ public class TestAgent2 extends JFrame {
         JPanel topContainer = new JPanel(new BorderLayout());
         JPanel pnlConn = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlConn.setBackground(new Color(230, 240, 250));
-        pnlConn.add(new JLabel("Target: " + ADDRESS + " | Community: " + COMMUNITY));
+        pnlConn.add(new JLabel("Target: " + ADDRESS));
+        pnlConn.add(new JLabel(" | Community: "));
+        txtCommunity = new JTextField("public", 10); // Default value "public"
+        pnlConn.add(txtCommunity);
         topContainer.add(pnlConn, BorderLayout.NORTH);
 
         JPanel pnlControls = new JPanel(new GridBagLayout());
@@ -313,7 +318,7 @@ public class TestAgent2 extends JFrame {
     private CommunityTarget createTarget() {
         Address addr = new UdpAddress(ADDRESS);
         CommunityTarget t = new CommunityTarget();
-        t.setCommunity(new OctetString(COMMUNITY));
+        t.setCommunity(new OctetString(txtCommunity.getText()));
         t.setAddress(addr);
         t.setRetries(0); t.setTimeout(800); t.setVersion(SnmpConstants.version2c);
         return t;
