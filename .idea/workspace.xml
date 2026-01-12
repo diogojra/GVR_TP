@@ -6,12 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="so escoa quando o semaforo esta verd">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/AgentConfig.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/Agent.bc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TestAgent2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestAgent2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/viasdestino.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/viasdestino.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,8 +114,7 @@
       <workItem from="1764176302021" duration="5650000" />
       <workItem from="1764242809892" duration="1409000" />
       <workItem from="1765897669047" duration="5041000" />
-      <workItem from="1767869752339" duration="1816000" />
-      <workItem from="1768232223176" duration="6670000" />
+      <workItem from="1767869752339" duration="1638000" />
     </task>
     <task id="LOCAL-00001" summary="VISUAL LANES">
       <option name="closed" value="true" />
@@ -134,15 +132,7 @@
       <option name="project" value="LOCAL" />
       <updated>1763643506038</updated>
     </task>
-    <task id="LOCAL-00003" summary="so escoa quando o semaforo esta verd">
-      <option name="closed" value="true" />
-      <created>1767877233596</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1767877233596</updated>
-    </task>
-    <option name="localTasksCounter" value="4" />
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
