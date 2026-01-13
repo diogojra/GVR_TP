@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="so escoa quando o semaforo esta verd">
+    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_21.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/viasdestino.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/viasdestino.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GVR_TP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/GVR_TP.iml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,29 +49,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Agent.executor&quot;: &quot;Run&quot;,
-    &quot;Application.TestAgent.executor&quot;: &quot;Run&quot;,
-    &quot;Application.TestAgent2.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;SDSSFR&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/arauj/Downloads/snmp4j-3.9.6.jar&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Agent.executor": "Run",
+    "Application.TestAgent.executor": "Run",
+    "Application.TestAgent2.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "SDSSFR",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/arauj/OneDrive/Documentos/GitHub/GVR_TP/lib/snmp4j-3.9.6.jar",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.21149425",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="Application.TestAgent2">
+}]]></component>
+  <component name="RunManager" selected="Application.Agent">
     <configuration name="Agent" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Agent" />
       <module name="GVR_TP" />
@@ -89,8 +88,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.TestAgent2" />
         <item itemvalue="Application.Agent" />
+        <item itemvalue="Application.TestAgent2" />
       </list>
     </recent_temporary>
   </component>
@@ -115,6 +114,7 @@
       <workItem from="1764242809892" duration="1409000" />
       <workItem from="1765897669047" duration="5041000" />
       <workItem from="1767869752339" duration="1638000" />
+      <workItem from="1768319501028" duration="5905000" />
     </task>
     <task id="LOCAL-00001" summary="VISUAL LANES">
       <option name="closed" value="true" />
@@ -141,6 +141,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="VISUAL LANES" />
     <MESSAGE value="so escoa quando o semaforo esta verd" />
-    <option name="LAST_COMMIT_MESSAGE" value="so escoa quando o semaforo esta verd" />
+    <MESSAGE value="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo" />
+    <option name="LAST_COMMIT_MESSAGE" value="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo" />
   </component>
 </project>
