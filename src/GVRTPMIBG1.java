@@ -741,8 +741,8 @@ public void initializeSampleData() {
     try {
         // Read from CSV files
 
-        readLaneDataFromCSV("C:\\Users\\arauj\\OneDrive\\Documentos\\GitHub\\GVR_TP\\src\\lanes.txt"); //meter o vosso caminho especifico
-        readViaDestDataFromCSV("C:\\Users\\arauj\\OneDrive\\Documentos\\GitHub\\GVR_TP\\src\\viasdestino.txt");
+        readLaneDataFromCSV("C:\\Users\\arauj\\Documents\\GitHub\\GVR_TP\\src\\lanes.txt");
+        readViaDestDataFromCSV("C:\\Users\\arauj\\Documents\\GitHub\\GVR_TP\\src\\viasdestino.txt");
 
         System.out.println("Sample data initialized successfully from files");
     } catch (Exception e) {

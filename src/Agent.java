@@ -9,15 +9,14 @@ import org.snmp4j.*;
 import org.snmp4j.agent.*;
 import org.snmp4j.agent.io.*;
 import org.snmp4j.agent.io.prop.*;
+import org.snmp4j.agent.mo.*;
 import org.snmp4j.agent.mo.snmp.*;
 import org.snmp4j.cfg.EngineBootsCounterFile;
 import org.snmp4j.mp.*;
-import org.snmp4j.security.SecurityLevel;
-import org.snmp4j.security.SecurityModel;
+import org.snmp4j.security.*;
 import org.snmp4j.smi.*;
 import org.snmp4j.transport.*;
 import org.snmp4j.util.*;
-import org.snmp4j.security.SecurityProtocols;
 import org.snmp4j.log.LogFactory;
 import org.snmp4j.log.LogAdapter;
 import org.snmp4j.log.JavaLogFactory;
@@ -26,11 +25,6 @@ import org.snmp4j.agent.request.SubRequest;
 import org.snmp4j.agent.request.RequestStatus;
 import org.snmp4j.agent.request.Request;
 import org.snmp4j.agent.request.SubRequestIterator;
-import org.snmp4j.agent.mo.DefaultMOFactory;
-import org.snmp4j.agent.mo.MOTableRowListener;
-import org.snmp4j.agent.mo.MOTableRowEvent;
-import org.snmp4j.agent.mo.MOMutableTableRow;
-import org.snmp4j.agent.mo.MOFactory;
 
 import javax.swing.*;
 
@@ -47,7 +41,7 @@ public class Agent implements VariableProvider {
     private static final String DEFAULT_CL_PARAMETERS = "-c[s{=Agent.cfg}] -bc[s{=Agent.bc}]";
     private static final String DEFAULT_CL_COMMANDS = "#address[s{=udp:127.0.0.1/555}<(udp|tcp):.*[/[0-9]+]?>] ..";
 
-    private LogAdapter logger = LogFactory.getLogger(Agent.class);
+    private final LogAdapter logger = LogFactory.getLogger(Agent.class);
 
     protected AgentConfigManager agent;
     protected MOServer server;
@@ -124,9 +118,10 @@ public class Agent implements VariableProvider {
     public void run() {
         // initialize agent before registering our own modules
         agent.initialize();
-        configureDetailedVACM();
+        configureVACM(agent.getVacmMIB());
         // this requires sysUpTime to be available.
         registerMIBs();
+        addCommunities();
         // add proxy forwarder
         agent.setupProxyForwarder();
         // now continue agent setup and launch it.
@@ -140,10 +135,6 @@ public class Agent implements VariableProvider {
      */
     protected MOFactory getFactory() {
         //|:AgenPro|=factory
-
-
-
-
 
         return DefaultMOFactory.getInstance();
         //|AgenPro:|
@@ -348,103 +339,81 @@ public class Agent implements VariableProvider {
         });
         //|AgenPro:|
     }
-    protected void configureDetailedVACM() {
-        VacmMIB vacm = agent.getVacmMIB();
+
+
+    public void configureVACM(VacmMIB vacm) {
+        // OIDs
+        OID oidLaneTable = new OID(new int[] { 1, 3, 6, 1, 3, 2025, 1, 1, 1 });
+        OID oidViaDestTable = new OID(new int[] { 1, 3, 6, 1, 3, 2025, 1, 2, 1 });
+        OID oidGvrtpRoot = new OID(new int[] { 1, 3, 6, 1, 3, 2025 });
+
+        // Scalars to explicitly exclude
+        OID oidScalar1 = new OID(new int[] { 1, 3, 6, 1, 3, 2025, 1, 3 }); // SysUpTime
+        OID oidScalar2 = new OID(new int[] { 1, 3, 6, 1, 3, 2025, 1, 4 }); // SysStepTime
+
+        int securityModel = SecurityModel.SECURITY_MODEL_SNMPv2c;
+        int storageType = MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY;
+
+        // 1. CLEANUP (Remove defaults)
+        vacm.removeGroup(securityModel, new OctetString("public"));
+        vacm.removeGroup(SecurityModel.SECURITY_MODEL_SNMPv1, new OctetString("public"));
+
+        // 2. GROUPS
+        vacm.addGroup(securityModel, new OctetString("public"), new OctetString("public-group"), storageType);
+        vacm.addGroup(securityModel, new OctetString("private"), new OctetString("private-group"), storageType);
+
+        // 3. VIEWS
+        // Public: Include Tables, EXCLUDE Scalars
+        vacm.addViewTreeFamily(new OctetString("restricted-view"), oidLaneTable, new OctetString(), VacmMIB.vacmViewIncluded, storageType);
+        vacm.addViewTreeFamily(new OctetString("restricted-view"), oidViaDestTable, new OctetString(), VacmMIB.vacmViewIncluded, storageType);
+        vacm.addViewTreeFamily(new OctetString("restricted-view"), oidScalar1, new OctetString(), VacmMIB.vacmViewExcluded, storageType);
+        vacm.addViewTreeFamily(new OctetString("restricted-view"), oidScalar2, new OctetString(), VacmMIB.vacmViewExcluded, storageType);
+
+        // Private: Full View
+        vacm.addViewTreeFamily(new OctetString("full-view"), oidGvrtpRoot, new OctetString(), VacmMIB.vacmViewIncluded, storageType);
+
+        // 4. ACCESS
+        vacm.addAccess(new OctetString("public-group"), new OctetString(), securityModel, SecurityLevel.NOAUTH_NOPRIV, VacmMIB.vacmPrefixMatch,
+                new OctetString("restricted-view"), null, new OctetString("restricted-view"), storageType);
+
+        vacm.addAccess(new OctetString("private-group"), new OctetString(), securityModel, SecurityLevel.NOAUTH_NOPRIV, VacmMIB.vacmPrefixMatch,
+                new OctetString("full-view"), new OctetString("full-view"), new OctetString("full-view"), storageType);
+    }
+
+    // =================================================================================
+    //  FIXED COMMUNITY REGISTRATION
+    // =================================================================================
+    private void addCommunities() {
         SnmpCommunityMIB communityMIB = agent.getSnmpCommunityMIB();
+        if (communityMIB == null) return;
 
-        if (vacm == null || communityMIB == null) return;
+        // CRITICAL FIX 1: Use the LOCAL Engine ID (Same as Public).
+        // If we use empty context, it mismatches the data registration.
+        OctetString contextEngineID = this.localEngineID;
 
-        // LIMPEZA (Opcional, mas boa prática): Tentar remover entradas padrão se existirem
-        // Isto ajuda caso não apagues o Agent.cfg
-        vacm.removeGroup(SecurityModel.SECURITY_MODEL_SNMPv2c, new OctetString("public"));
+        // CRITICAL FIX 2: Use VOLATILE storage (2).
+        // This ensures this row is NEVER saved to Agent.cfg.
+        // It prevents the "Old Config vs New Code" conflict forever.
+        int storageType = StorageType.volatile_;
 
-        // --- 1. CONFIGURAÇÃO DE COMUNIDADES ---
-        // Mapeamos a comunidade "public" para um nome interno "sec_public" (para não confundir com defaults)
+        System.out.println("Registering 'private' with Local EngineID: " + contextEngineID);
+
+        // Remove old private entry if it exists (from old config file)
+        try {
+            OID privateIndex = new OctetString("private").toSubIndex(true);
+            if (communityMIB.getSnmpCommunityEntry().getModel().containsRow(privateIndex)) {
+                communityMIB.getSnmpCommunityEntry().removeRow(privateIndex);
+            }
+        } catch (Exception e) {}
+
         communityMIB.addSnmpCommunityEntry(
-                new OctetString("public"),       // Index
-                new OctetString("public"),       // Community Name (O que escreves no GUI)
-                new OctetString("sec_public"),   // Security Name (Nome interno único)
-                new OctetString(), new OctetString(), new OctetString(),
-                StorageType.nonVolatile
+                new OctetString("private"), // Index
+                new OctetString("private"), // Community Name
+                new OctetString("private"), // Security Name
+                contextEngineID,            // USE LOCAL ENGINE ID
+                new OctetString(),          // Context Name
+                new OctetString(),          // Transport Tag
+                storageType                 // VOLATILE (Do not save to disk)
         );
-
-        // Mapeamos a comunidade "private" para "sec_private"
-        communityMIB.addSnmpCommunityEntry(
-                new OctetString("private"),      // Index
-                new OctetString("private"),      // Community Name
-                new OctetString("sec_private"),  // Security Name
-                new OctetString(), new OctetString(), new OctetString(),
-                StorageType.nonVolatile
-        );
-
-        // --- 2. CONFIGURAÇÃO DE GRUPOS ---
-        // Grupo Restrito
-        vacm.addGroup(SecurityModel.SECURITY_MODEL_SNMPv2c,
-                new OctetString("sec_public"),
-                new OctetString("group_restricted"),
-                StorageType.nonVolatile);
-
-        // Grupo Admin
-        vacm.addGroup(SecurityModel.SECURITY_MODEL_SNMPv2c,
-                new OctetString("sec_private"),
-                new OctetString("group_admin"),
-                StorageType.nonVolatile);
-
-        // --- 3. CONFIGURAÇÃO DE VISTAS (VIEWS) ---
-
-        // 3.1 Vista TOTAL (Para o admin)
-        vacm.addViewTreeFamily(new OctetString("view_full"),
-                new OID("1.3.6"),
-                new OctetString(),
-                VacmMIB.vacmViewIncluded,
-                StorageType.nonVolatile);
-
-        // 3.2 Vista RESTRITA (Para o public)
-        // Passo A: Incluir tudo inicialmente
-        vacm.addViewTreeFamily(new OctetString("view_restricted"),
-                new OID("1.3.6"),
-                new OctetString(),
-                VacmMIB.vacmViewIncluded,
-                StorageType.nonVolatile);
-
-        // Passo B: EXCLUIR UpTime (1.3.6.1.3.2025.1.3.0)
-        vacm.addViewTreeFamily(new OctetString("view_restricted"),
-                new OID("1.3.6.1.3.2025.1.3.0"),
-                new OctetString(),
-                VacmMIB.vacmViewExcluded,
-                StorageType.nonVolatile);
-
-        // Passo C: EXCLUIR StepTime (1.3.6.1.3.2025.1.4.0)
-        vacm.addViewTreeFamily(new OctetString("view_restricted"),
-                new OID("1.3.6.1.3.2025.1.4.0"),
-                new OctetString(),
-                VacmMIB.vacmViewExcluded,
-                StorageType.nonVolatile);
-
-        // --- 4. CONFIGURAÇÃO DE ACESSO ---
-
-        // Acesso do 'public' (Apenas Leitura na view_restricted)
-        vacm.addAccess(new OctetString("group_restricted"),
-                new OctetString(),
-                SecurityModel.SECURITY_MODEL_ANY,
-                SecurityLevel.NOAUTH_NOPRIV,
-                VacmMIB.vacmExactMatch,
-                new OctetString("view_restricted"), // Read View
-                new OctetString(),                  // Write View (Vazio = Sem escrita)
-                new OctetString("view_restricted"), // Notify View
-                StorageType.nonVolatile);
-
-        // Acesso do 'private' (Leitura e Escrita na view_full)
-        vacm.addAccess(new OctetString("group_admin"),
-                new OctetString(),
-                SecurityModel.SECURITY_MODEL_ANY,
-                SecurityLevel.NOAUTH_NOPRIV,
-                VacmMIB.vacmExactMatch,
-                new OctetString("view_full"), // Read View
-                new OctetString("view_full"), // Write View (Pode fazer SET)
-                new OctetString("view_full"), // Notify View
-                StorageType.nonVolatile);
-
-        System.out.println(">>> VACM Configurado: public (restrito) vs private (admin) <<<");
     }
 }

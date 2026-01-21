@@ -4,24 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo">
+    <list default="true" id="9963d187-f803-411a-9025-ffbf43ed3998" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_21.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Agent.cfg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/GVR_TP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/GVR_TP.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AgentConfig.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/AgentConfig.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/GVRTPMIBG1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GVRTPMIBG1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TestAgent2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestAgent2.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Class" />
-      </list>
-    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -35,16 +33,16 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/K0Kosuki/GVR_TP.git&quot;,
-    &quot;accountId&quot;: &quot;fc73373e-0746-44c9-bc4a-b458a4035e37&quot;
+    &quot;accountId&quot;: &quot;c07d2fac-0fdc-4088-87dc-628956071cc7&quot;
   }
 }</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 7
+  &quot;associatedIndex&quot;: 5
 }</component>
-  <component name="ProjectId" id="35jxoLXF7KOJyaLCpd3YkmoZOse" />
+  <component name="ProjectId" id="38DTMl2Tk1KZOPKTcKOKhzoPDA7" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -52,14 +50,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.Agent.executor": "Run",
-    "Application.TestAgent.executor": "Run",
     "Application.TestAgent2.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "SDSSFR",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/arauj/OneDrive/Documentos/GitHub/GVR_TP/lib/snmp4j-3.9.6.jar",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -68,80 +66,55 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.21149425",
+    "settings.editor.selected.configurable": "configurable.group.tools",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Application.Agent">
-    <configuration name="Agent" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Agent" />
-      <module name="GVR_TP" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="TestAgent2" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="TestAgent2" />
-      <module name="GVR_TP" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.Agent" />
-        <item itemvalue="Application.TestAgent2" />
-      </list>
-    </recent_temporary>
-  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.24978.46" />
-        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-IU-243.24978.46" />
+        <option value="bundled-jdk-30f59d01ecdd-26cb7f24e5b0-intellij.indexing.shared.core-IU-253.29346.240" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.29346.240" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="35559aaa-7ba2-4c48-8dda-3eedecb76f73" name="Changes" comment="" />
-      <created>1763637456208</created>
+      <changelist id="9963d187-f803-411a-9025-ffbf43ed3998" name="Changes" comment="" />
+      <created>1768333097784</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1763637456208</updated>
-      <workItem from="1763637457371" duration="6209000" />
-      <workItem from="1764176302021" duration="5650000" />
-      <workItem from="1764242809892" duration="1409000" />
-      <workItem from="1765897669047" duration="5041000" />
-      <workItem from="1767869752339" duration="1638000" />
-      <workItem from="1768319501028" duration="5905000" />
+      <updated>1768333097784</updated>
+      <workItem from="1768333098904" duration="2402000" />
+      <workItem from="1768336309454" duration="156000" />
+      <workItem from="1768336647440" duration="626000" />
+      <workItem from="1768337530293" duration="922000" />
+      <workItem from="1768338544546" duration="514000" />
+      <workItem from="1768339074495" duration="107000" />
+      <workItem from="1768339312894" duration="224000" />
+      <workItem from="1768341263296" duration="98000" />
+      <workItem from="1768341412567" duration="130000" />
+      <workItem from="1768341564515" duration="67000" />
+      <workItem from="1768341640794" duration="2000" />
+      <workItem from="1768342082258" duration="79000" />
+      <workItem from="1769004856997" duration="7202000" />
     </task>
-    <task id="LOCAL-00001" summary="VISUAL LANES">
-      <option name="closed" value="true" />
-      <created>1763642676367</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1763642676367</updated>
-    </task>
-    <task id="LOCAL-00002" summary="so escoa quando o semaforo esta verd">
-      <option name="closed" value="true" />
-      <created>1763643506034</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1763643506038</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="VISUAL LANES" />
-    <MESSAGE value="so escoa quando o semaforo esta verd" />
-    <MESSAGE value="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo" />
-    <option name="LAST_COMMIT_MESSAGE" value="viewacessmodel iniciado mas nao completei, acrescentei uma parte onde da para meter o communitystring e corriji o walk de tudo" />
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

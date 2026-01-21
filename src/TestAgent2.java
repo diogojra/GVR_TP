@@ -38,13 +38,24 @@ public class TestAgent2 extends JFrame {
     private Timer pollingTimer;
     private final Map<String, MibNode> mibDictionary = new LinkedHashMap<>();
 
+    private Snmp snmpSession;
+
     public TestAgent2() {
         super("Traffic Network Manager - Smart Logging");
         initMibDictionary();
         initUI();
+        initSnmp();
         startPolling();
     }
-
+    private void initSnmp() {
+        try {
+            TransportMapping<?> t = new DefaultUdpTransportMapping();
+            snmpSession = new Snmp(t);
+            t.listen();
+        } catch (IOException e) {
+            log("Error starting SNMP Client: " + e.getMessage());
+        }
+    }
     // 1. MIB STRUCTURE
     private void initMibDictionary() {
         mibDictionary.put(">> ENTIRE MIB (WALK All) <<", new MibNode("", false, true));
@@ -163,7 +174,7 @@ public class TestAgent2 extends JFrame {
         try {
             OID oid = new OID(oidStr);
             if ("WALK".equals(operation)) {
-                walkTableLog(s, target, oid);
+                walkTableLog(target, oid);
             } else {
                 PDU p = new PDU(); p.add(new VariableBinding(oid));
                 if ("SET".equals(operation)) {
@@ -182,16 +193,28 @@ public class TestAgent2 extends JFrame {
         } finally { s.close(); }
     }
 
-    private void walkTableLog(Snmp snmp, Target target, OID rootOID) throws IOException {
+    private void walkTableLog(Target target, OID rootOID) throws IOException {
         OID currentOID = new OID(rootOID);
-        while (true) {
-            PDU pdu = new PDU(); pdu.add(new VariableBinding(currentOID)); pdu.setType(PDU.GETNEXT);
-            ResponseEvent resp = snmp.send(pdu, target);
-            if (resp == null || resp.getResponse() == null) break;
-            VariableBinding vb = resp.getResponse().get(0);
-            if (!vb.getOid().startsWith(rootOID)) break;
 
-            // Smart Log
+        while (true) {
+            PDU pdu = new PDU();
+            pdu.add(new VariableBinding(currentOID));
+            pdu.setType(PDU.GETNEXT);
+
+            ResponseEvent resp = snmpSession.send(pdu, target);
+            if (resp == null || resp.getResponse() == null) break;
+
+            VariableBinding vb = resp.getResponse().get(0);
+
+            // STOP CONDITIONS:
+            // 1. If we left the subtree
+            if (!vb.getOid().startsWith(rootOID)) break;
+            // 2. If the response is an exception (End Of View)
+            if (vb.getVariable().isException()) break;
+            // 3. If the OID did not increase (Infinite Loop Protection)
+            if (vb.getOid().compareTo(currentOID) <= 0) break;
+
+            // Log Valid Result
             String readable = formatOID(vb.getOid());
             log(readable + " = " + vb.getVariable());
 
@@ -267,51 +290,62 @@ public class TestAgent2 extends JFrame {
 
     private Map<Integer, LaneData> networkWalkLanes() throws IOException {
         Map<Integer, LaneData> result = new HashMap<>();
-        TransportMapping<?> t = new DefaultUdpTransportMapping(); Snmp s = new Snmp(t); t.listen();
-        try {
-            CommunityTarget target = createTarget();
-            OID oid = LANE_ENTRY_OID;
-            while(true) {
-                PDU pdu = new PDU(); pdu.add(new VariableBinding(oid)); pdu.setType(PDU.GETNEXT);
-                ResponseEvent r = s.send(pdu, target);
-                if(r==null || r.getResponse()==null) break;
-                VariableBinding vb = r.getResponse().get(0);
-                if(!vb.getOid().startsWith(LANE_ENTRY_OID)) break;
-                int[] raw = vb.getOid().toIntArray();
-                int id = raw[raw.length-1];
-                int col = raw[raw.length-2];
-                LaneData d = result.getOrDefault(id, new LaneData(id));
-                if(col==2) d.vehicleCount = vb.getVariable().toInt();
-                if(col==3) d.semaphoreColor = vb.getVariable().toInt();
-                if(col==4) d.timeToChange = vb.getVariable().toInt();
-                if(col==5) d.capacity = vb.getVariable().toInt();
-                if(col==8) d.isTerminal = (vb.getVariable().toInt() == 1);
-                result.put(id, d);
-                oid = vb.getOid();
-            }
-        } finally { s.close(); }
+        CommunityTarget target = createTarget();
+        OID oid = LANE_ENTRY_OID; // .1.1.1
+
+        while(true) {
+            PDU pdu = new PDU(); pdu.add(new VariableBinding(oid)); pdu.setType(PDU.GETNEXT);
+            ResponseEvent r = snmpSession.send(pdu, target);
+            if(r==null || r.getResponse()==null) break;
+
+            VariableBinding vb = r.getResponse().get(0);
+
+            // Fix: Check Loop & Exceptions
+            if(!vb.getOid().startsWith(LANE_ENTRY_OID)) break;
+            if(vb.getVariable().isException()) break;
+            if(vb.getOid().compareTo(oid) <= 0) break;
+
+            int[] raw = vb.getOid().toIntArray();
+            int id = raw[raw.length-1];
+            int col = raw[raw.length-2];
+
+            LaneData d = result.getOrDefault(id, new LaneData(id));
+            if(col==2) d.vehicleCount = vb.getVariable().toInt();
+            if(col==3) d.semaphoreColor = vb.getVariable().toInt();
+            if(col==4) d.timeToChange = vb.getVariable().toInt();
+            if(col==5) d.capacity = vb.getVariable().toInt();
+            if(col==8) d.isTerminal = (vb.getVariable().toInt() == 1);
+
+            result.put(id, d);
+            oid = vb.getOid();
+        }
         return result;
     }
 
     private List<Connection> networkWalkConnections() throws IOException {
         List<Connection> list = new ArrayList<>();
-        TransportMapping<?> t = new DefaultUdpTransportMapping(); Snmp s = new Snmp(t); t.listen();
-        try {
-            CommunityTarget target = createTarget();
-            OID oid = VIA_DEST_ENTRY_OID;
-            while(true) {
-                PDU pdu = new PDU(); pdu.add(new VariableBinding(oid)); pdu.setType(PDU.GETNEXT);
-                ResponseEvent r = s.send(pdu, target);
-                if(r==null || r.getResponse()==null) break;
-                VariableBinding vb = r.getResponse().get(0);
-                if(!vb.getOid().startsWith(VIA_DEST_ENTRY_OID)) break;
-                int[] raw = vb.getOid().toIntArray();
-                int col = raw[raw.length-3];
-                int laneID = raw[raw.length-1];
-                if(col==2) list.add(new Connection(laneID, vb.getVariable().toInt()));
-                oid = vb.getOid();
-            }
-        } finally { s.close(); }
+        CommunityTarget target = createTarget();
+        OID oid = VIA_DEST_ENTRY_OID; // .1.2.1
+
+        while(true) {
+            PDU pdu = new PDU(); pdu.add(new VariableBinding(oid)); pdu.setType(PDU.GETNEXT);
+            ResponseEvent r = snmpSession.send(pdu, target);
+            if(r==null || r.getResponse()==null) break;
+
+            VariableBinding vb = r.getResponse().get(0);
+
+            // Fix: Check Loop & Exceptions
+            if(!vb.getOid().startsWith(VIA_DEST_ENTRY_OID)) break;
+            if(vb.getVariable().isException()) break;
+            if(vb.getOid().compareTo(oid) <= 0) break;
+
+            int[] raw = vb.getOid().toIntArray();
+            int col = raw[raw.length-3];
+            int laneID = raw[raw.length-1];
+            if(col==2) list.add(new Connection(laneID, vb.getVariable().toInt()));
+
+            oid = vb.getOid();
+        }
         return list;
     }
 
