@@ -41,7 +41,7 @@ public class TestAgent2 extends JFrame {
     private Snmp snmpSession;
 
     public TestAgent2() {
-        super("Traffic Network Manager - Smart Logging");
+        super("Traffic Network Manager");
         initMibDictionary();
         initUI();
         initSnmp();
@@ -62,6 +62,7 @@ public class TestAgent2 extends JFrame {
         mibDictionary.put("System: Up Time (.1.3.0)",        new MibNode(".1.3.0", false, false));
         mibDictionary.put("System: Step Time (.1.4.0)",        new MibNode(".1.4.0", false, false));
 
+        mibDictionary.put(">> [GET] Specific Lane (All Cols)", new MibNode(".1.1.1", true, false));
         String laneBase = ".1.1.1";
         mibDictionary.put(">> [GET/SET] Lane Variable...", new MibNode(laneBase, true, false));
         mibDictionary.put("   Vehicle Count",    new MibNode(laneBase + ".2", true, false));
@@ -143,12 +144,26 @@ public class TestAgent2 extends JFrame {
         cmbVariables.setSelectedIndex(0);
     }
 
-    // --- MANUAL SNMP EXECUTION ---
+    // MANUAL SNMP EXECUTION
     private void executeSNMP() {
         new Thread(() -> {
             String op = (String) cmbOperations.getSelectedItem();
             String key = (String) cmbVariables.getSelectedItem();
             MibNode node = mibDictionary.get(key);
+
+            // Works like a walk for a specific lane
+            if (key.contains("Specific Lane (All Cols)")) {
+                String idx = txtIndex.getText().trim();
+                if (idx.isEmpty()) { log("Error: Index required for Lane Row."); return; }
+                log("\n>> Fetching ALL columns for Lane ID: " + idx);
+                try {
+                    // Method that gets all the info for the lane
+                    getEntireLaneRow(Integer.parseInt(idx));
+                } catch (Exception ex) {
+                    log("Error: " + ex.getMessage());
+                }
+                return;
+            }
 
             if (key.startsWith(">>") && !key.contains("WALK")) {
                 log("Please select a valid option.");
@@ -193,10 +208,54 @@ public class TestAgent2 extends JFrame {
         } finally { s.close(); }
     }
 
+    // "Multi-Variable GET" to retrieve 7 columns at once for a specific Lane ID.
+    private void getEntireLaneRow(int laneId) throws IOException {
+        CommunityTarget target = createTarget();
+        PDU pdu = new PDU();
+        pdu.setType(PDU.GET);
+
+        // The Base OID for the Lane Table Entry
+        String baseEntry = "1.3.6.1.3.2025.1.1.1";
+
+        // Columns defined in MIB (2=VehCount, 3=Color, 4=Time, 5=Cap, 6=RGT, 7=Total, 8=ViaTerm)
+        int[] columns = {2, 3, 4, 5, 6, 7, 8};
+
+        // Construct the OIDs: base.column.laneId
+        for (int col : columns) {
+            pdu.add(new VariableBinding(new OID(baseEntry + "." + col + "." + laneId)));
+        }
+
+        // Send one request with 7 OIDs
+        ResponseEvent r = snmpSession.send(pdu, target);
+
+        if (r != null && r.getResponse() != null) {
+            PDU responsePDU = r.getResponse();
+
+            // Check for errors (like if Lane ID doesn't exist)
+            if (responsePDU.getErrorStatus() != PDU.noError) {
+                log("Error: " + responsePDU.getErrorStatusText());
+                return;
+            }
+
+            for (VariableBinding vb : responsePDU.getVariableBindings()) {
+                if (vb.getVariable().isException()) {
+                    log(formatOID(vb.getOid()) + " = [Not Available / NoSuchInstance]");
+                } else {
+                    log(formatOID(vb.getOid()) + " = " + vb.getVariable());
+                }
+            }
+        } else {
+            log("Timeout. Agent did not respond.");
+        }
+    }
+
+
+    // Performs an SNMP WALK
     private void walkTableLog(Target target, OID rootOID) throws IOException {
         OID currentOID = new OID(rootOID);
 
         while (true) {
+            // Send GETNEXT
             PDU pdu = new PDU();
             pdu.add(new VariableBinding(currentOID));
             pdu.setType(PDU.GETNEXT);
@@ -211,19 +270,20 @@ public class TestAgent2 extends JFrame {
             if (!vb.getOid().startsWith(rootOID)) break;
             // 2. If the response is an exception (End Of View)
             if (vb.getVariable().isException()) break;
-            // 3. If the OID did not increase (Infinite Loop Protection)
+            // 3. If the OID did not increase
             if (vb.getOid().compareTo(currentOID) <= 0) break;
 
             // Log Valid Result
             String readable = formatOID(vb.getOid());
             log(readable + " = " + vb.getVariable());
 
+            // Preparing for the next iteration
             currentOID = vb.getOid();
         }
         log("End of Walk.");
     }
 
-    // --- OID TRANSLATOR (The "Easy to Read" Fix) ---
+    // OID TRANSLATOR (puting tags on OIDs)
     private String formatOID(OID oid) {
         String oidStr = oid.toString();
         // Check for Lane Table
@@ -234,6 +294,7 @@ public class TestAgent2 extends JFrame {
                 int col = raw[raw.length - 2];
                 int idx = raw[raw.length - 1];
 
+                // Mapping the column to names
                 String colName = switch (col) {
                     case 2 -> "Vehicle Count";
                     case 3 -> "Semaphore Color";
@@ -272,7 +333,7 @@ public class TestAgent2 extends JFrame {
         });
     }
 
-    // --- VISUALIZER POLLING ---
+    // VISUALIZER POLLING
     private void startPolling() {
         pollingTimer = new Timer(1000, e -> fetchData());
         pollingTimer.start();
@@ -284,14 +345,14 @@ public class TestAgent2 extends JFrame {
                 Map<Integer, LaneData> lanes = networkWalkLanes();
                 List<Connection> connections = networkWalkConnections();
                 SwingUtilities.invokeLater(() -> topologyPanel.updateGraph(lanes, connections));
-            } catch (Exception ex) { /* Silent fail */ }
+            } catch (Exception ex) { }
         }).start();
     }
 
     private Map<Integer, LaneData> networkWalkLanes() throws IOException {
         Map<Integer, LaneData> result = new HashMap<>();
         CommunityTarget target = createTarget();
-        OID oid = LANE_ENTRY_OID; // .1.1.1
+        OID oid = LANE_ENTRY_OID;
 
         while(true) {
             PDU pdu = new PDU(); pdu.add(new VariableBinding(oid)); pdu.setType(PDU.GETNEXT);
@@ -300,7 +361,7 @@ public class TestAgent2 extends JFrame {
 
             VariableBinding vb = r.getResponse().get(0);
 
-            // Fix: Check Loop & Exceptions
+            // Check Loop & Exceptions
             if(!vb.getOid().startsWith(LANE_ENTRY_OID)) break;
             if(vb.getVariable().isException()) break;
             if(vb.getOid().compareTo(oid) <= 0) break;
@@ -358,10 +419,7 @@ public class TestAgent2 extends JFrame {
         return t;
     }
 
-    // =============================================================
-    // === LAYERED GRAPH ENGINE (Visualizer) ===
-    // =============================================================
-
+    // Visualizer
     private class LayeredGraphPanel extends JPanel {
         private Map<Integer, LaneData> lanes = new HashMap<>();
         private List<VisualLane> visualLanes = new ArrayList<>();
@@ -538,7 +596,6 @@ public class TestAgent2 extends JFrame {
             drawBadge(g2, "L" + vl.id, lx, ly - 20, new Color(240, 240, 255));
             drawBadge(g2, "V: " + data.vehicleCount + "/" + cap, lx, ly + 20, new Color(200, 255, 255));
 
-            // Offset timer 75% down
             double tTimer = 0.75;
             int tx = (int)(vl.p1.x + tTimer * (vl.p2.x - vl.p1.x));
             int ty = (int)(vl.p1.y + tTimer * (vl.p2.y - vl.p1.y));

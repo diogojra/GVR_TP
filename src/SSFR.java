@@ -27,7 +27,7 @@ public class SSFR implements Runnable {
             try {
                 runOneStep();
 
-                // Dynamic simulation speed: fetch the step delay from the MIB (currently its at 1000 ms)
+                // Dynamic simulation speed: fetch the step delay from the MIB (currently its at 1s)
                 int stepMs = mib.getSysStepTime().getValue().toInt();
                 if (stepMs <= 0) stepMs = 1000;
                 Thread.sleep(stepMs);
@@ -76,18 +76,21 @@ public class SSFR implements Runnable {
             }
         }
 
-        // 4) Construir níveis ascendentes a partir das terminais (level 0 = terminais)
-        //    level -> set of laneIds
+        // Build ascending starting from the end (level 0 = terminals)
+        // We assign a "Level" to each lane based on its distance from a terminal.
+        // Level 0 = Terminals
+        // Level 1 = Lanes directly connected to terminals
+        // Level 2 = Lanes connected to Level 1, etc.
         Map<Integer, Set<Integer>> levels = new LinkedHashMap<>();
-        Set<Integer> visited = new HashSet<>(); // para evitar processar um nó várias vezes (evita ciclos infinitos)
+        Set<Integer> visited = new HashSet<>(); // To avoid reprocessing a node several times (infinite loops)
         Queue<Integer> q = new ArrayDeque<>();
 
-        // inicializa nível 0
+        // Inicializes level 0
         levels.put(0, new LinkedHashSet<>(terminals));
         visited.addAll(terminals);
         q.addAll(terminals);
 
-        // BFS reverso: pop terminal, adicionar seus predecessores (reverseMap) ao nível+1 se não visitados
+        // Reverse BFS : pop terminal, add the ones before him (reverseMap) to level+1 if they weren't processed yet
         Map<Integer, Integer> nodeLevel = new HashMap<>(); // laneId -> level
         for (Integer t : terminals) nodeLevel.put(t, 0);
 
@@ -95,6 +98,7 @@ public class SSFR implements Runnable {
             int current = q.poll();
             int curLevel = nodeLevel.get(current);
             List<Integer> preds = reverseMap.getOrDefault(current, Collections.emptyList());
+
             for (Integer pred : preds) {
                 if (!visited.contains(pred)) {
                     int nextLevel = curLevel + 1;
@@ -103,10 +107,10 @@ public class SSFR implements Runnable {
                     nodeLevel.put(pred, nextLevel);
                     q.add(pred);
                 } else {
-                    // se já visitado, mas podemos querer garantir que nodeLevel guarda o menor nível
+                    // Optimization: If we find a shorter path to an exit, update the level
                     int existing = nodeLevel.getOrDefault(pred, Integer.MAX_VALUE);
                     if (curLevel + 1 < existing) {
-                        // mover para nível inferior (mais próximo das terminais)
+                        // move to lower level(closer to terminal)
                         levels.get(existing).remove(pred);
                         int newLevel = curLevel + 1;
                         levels.computeIfAbsent(newLevel, k -> new LinkedHashSet<>()).add(pred);
@@ -116,11 +120,11 @@ public class SSFR implements Runnable {
             }
         }
 
-        // Observação: algumas lanes podem não estar conectadas às terminais — decidir o que fazer:
-        // vamos considerar também lanes isoladas (não alcançáveis pelas terminais) — adicioná-las como níveis superiores isolados
+
+        // Considering solo lanes (not reachable by the terminals) — add them like superior levels isolated
         for (Integer laneId : laneMap.keySet()) {
             if (!nodeLevel.containsKey(laneId)) {
-                // atribui um nível alto (por exemplo, maxLevel+1) para processar depois — isto garante que todas as lanes são consideradas
+                // atribute an high level (exemple, maxLevel+1) to process later — assuring every lane is considered
                 int maxLevel = levels.isEmpty() ? 0 : Collections.max(levels.keySet());
                 int assigned = maxLevel + 1;
                 levels.computeIfAbsent(assigned, k -> new LinkedHashSet<>()).add(laneId);
@@ -128,32 +132,31 @@ public class SSFR implements Runnable {
             }
         }
 
-        // 5) PROCESSAMENTO: do fundo (terminais) para cima
-
-        // 5a) Escoar totalmente as vias terminais (level 0)
+        // PROCESSING: from the bottom (terminals) up
+        // Removing everything from terminal lanes
         Set<Integer> level0 = levels.getOrDefault(0, Collections.emptySet());
         for (Integer termId : level0) {
             GVRTPMIBG1.LaneEntryRow termLane = laneMap.get(termId);
             if (termLane == null) continue;
             int color = termLane.getSemaphoreColor().getValue();
-            boolean open = (color == 1 || color == 2); // 1=verde, 2=amarelo
+            boolean open = (color == 1 || color == 2); // 1=green, 2=yellow
             if (!open) continue;
             int vehicles = (int) termLane.getVehicleCount().getValue();
             if (vehicles <= 0) continue;
-            // escoar tudo
+            // remove everything
             termLane.setVehicleCount(new Gauge32(0));
-            // atualizar totalVeh - assumimos que totalVeh conta os veículos que saíram por esta via
+            // update totalVeh - every vehicle that passed by this lane
             int totalVeh = termLane.getTotalVeh().getValue();
             termLane.setTotalVeh(new Integer32(totalVeh + vehicles));
         }
 
-        // 5b) Para cada nível > 0, do nível baixo para o alto:
-        // processamos níveis em ordem crescente (1,2,3,...), cada nível envia tráfego para os seus destinos
+        // For each level > 0, from lowest to highest:
+        // Moving traffic between levels
         List<Integer> levelKeys = new ArrayList<>(levels.keySet());
-        Collections.sort(levelKeys); // já devem estar em ordem, mas garantimos
+        Collections.sort(levelKeys); // assuring the order is correct
 
         for (int level : levelKeys) {
-            if (level == 0) continue; // já processado
+            if (level == 0) continue; // already processed
             Set<Integer> nodes = levels.getOrDefault(level, Collections.emptySet());
             if (nodes == null) continue;
 
@@ -161,22 +164,22 @@ public class SSFR implements Runnable {
                 GVRTPMIBG1.LaneEntryRow lane = laneMap.get(laneId);
                 if (lane == null) continue;
 
-                // Somente se tiver destinos configurados (se não tiver, nada faz)
+                // Only sends if it has destinies associated
                 List<GVRTPMIBG1.ViaDestEntryRow> outs = destMap.get(laneId);
                 if (outs == null || outs.isEmpty()) continue;
 
-                // verifica cor do semáforo: 1=green,2=yellow,3=red
+                // verifies semaphore color: 1=green,2=yellow,3=red
                 int color = lane.getSemaphoreColor().getValue();
                 boolean open = (color == 1 || color == 2);
                 if (!open) {
-                    // semáforo fechado -> não envia tráfego
+                    // if red -> doesnt send traffic
                     continue;
                 }
 
                 int originVehicles = (int) lane.getVehicleCount().getValue();
                 if (originVehicles <= 0) continue;
 
-                // calcular soma de fluxos válidos
+                // Verify that at least one destination has "flux" defined
                 int totalFluxo = 0;
                 for (GVRTPMIBG1.ViaDestEntryRow d : outs) {
                     int fluxo = d.getFluxoDest().getValue();
@@ -191,70 +194,69 @@ public class SSFR implements Runnable {
                 Map<Integer, Double> weights = new HashMap<>();
                 double totalWeight = 0.0;
 
-// 1. Calcular o peso de cada candidato (Baseado na % livre)
+                // Calculates the weight for every option (Based on free capicity %)
                 for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
                     int destId = d.getDestVia().getValue();
                     GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
 
-                    // Se a lane não existe, ignoramos
+                    // if the lanes doesnt exist we ignore
                     if (destLane == null) continue;
 
                     double currentVeh = destLane.getVehicleCount().getValue();
                     double capacity = destLane.getCapacity().getValue();
 
-                    // Se capacidade for 0 ou estiver cheia, peso é 0
+                    // if capacity 0 or if its full the weight is 0
                     if (capacity <= 0 || currentVeh >= capacity) {
                         weights.put(destId, 0.0);
                         continue;
                     }
 
-                    // Cálculo da percentagem de ocupação
+                    // Calculating the percentage of occupation
                     double occupancyRate = currentVeh / capacity;
 
-                    // O peso é o inverso da ocupação (ex: 20% ocupado = 80% de peso/atratividade)
-                    // Isso atende ao requisito: "enviar mais para a que tem menos"
+                    // The weight is the reverse of occupation (ex: 20% occupied = 80% weight)
+                    // Sending more to who has less weight
                     double weight = 1.0 - occupancyRate;
 
                     weights.put(destId, weight);
                     totalWeight += weight;
                 }
 
-// Se não há destinos viáveis (todos cheios), não faz nada
+                // if it isnt any available option, we dont send traffic
                 if (totalWeight > 0) {
 
-                    // Vamos distribuir os veículos que temos na origem (remaining)
+                    // Distribute the vehicles we have
                     int vehiclesToDistribute = remaining;
 
                     for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
-                        // Se já acabaram os veículos da origem no meio do loop, para.
+                        // if done distributing we stop
                         if (remaining <= 0) break;
 
                         int destId = d.getDestVia().getValue();
                         Double weight = weights.get(destId);
 
-                        // Se peso é zero (via cheia), pula
+                        // if weight is zero we jump to the next
                         if (weight == null || weight <= 0.0) continue;
 
                         GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);
 
-                        // 2. Calcular a quota proporcional
-                        // Ex: Se tenho 10 carros e meu peso é 50% do total, devo receber 5 carros.
+                        // Calculate the proporcional quota
+                        // Ex: if i have 10 cars and the weight is 50% i send 5 cars to that lane
                         double ratio = weight / totalWeight;
                         int targetShare = (int) Math.round(vehiclesToDistribute * ratio);
 
-                        // Ajuste fino: Se o cálculo der 0 (por arredondamento), mas houver espaço e peso,
-                        // tentamos enviar pelo menos 1 para manter o fluxo.
+                        // If the gives zero(due to approximations) but it has a space we still send
                         if (targetShare == 0 && remaining > 0) targetShare = 1;
 
-                        // 3. Respeitar limites físicos
+                        // Respecting the physical capacities of the lanes
                         int destVehicles = (int) destLane.getVehicleCount().getValue();
                         int destCapacity = destLane.getCapacity().getValue();
                         int freeSpace = destCapacity - destVehicles;
 
-                        // O que vamos mover é o MÍNIMO entre:
-                        // a) A quota calculada (targetShare)
-                        // b) O espaço físico real na via destino (freeSpace)
-                        // c) O que ainda resta na origem (remaining)
+                        // What we move is the lowest between:
+                        // a) The calculated quota (targetShare)
+                        // b) The freespace on the destination lane (freeSpace)
+                        // c) What remains on origin (remaining)
                         int toMove = Math.min(targetShare, freeSpace);
                         toMove = Math.min(toMove, remaining);
 
@@ -264,12 +266,10 @@ public class SSFR implements Runnable {
                             movedTotal += toMove;
                         }
                     }
-
-                    // Nota: Como usamos inteiros, pode sobrar 1 ou 2 veículos devido a arredondamentos.
-                    // Eles ficarão na origem para o próximo ciclo (step), o que é aceitável.
                 }
 
-// 3) Distribuição gulosa restante
+                // Greedy distribution of the remaining
+                // If proportional math left cars behind (rounding errors), push them anywhere that has space
                 for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
                     if (remaining <= 0) break;
 
@@ -290,7 +290,7 @@ public class SSFR implements Runnable {
                     movedTotal += toMove;
                 }
 
-// 4) Atualiza a origem
+                // Updates origin
                 if (movedTotal > 0) {
                     lane.setVehicleCount(new Gauge32(originVehicles - movedTotal));
                     int totalVeh = lane.getTotalVeh().getValue();
@@ -299,8 +299,8 @@ public class SSFR implements Runnable {
             }
         }
 
-        // 6) Finalmente, injetar RGT nas vias origem (aquelas com rgt>0)
-        //    Observação: "vias origem" podem ser todas as lanes ou só as identificadas com RGT>0. Aqui usamos rgt>0.
+        // Injecting the cars on origin lanes
+        // the origin lanes are identified with rgt>0
         for (GVRTPMIBG1.LaneEntryRow lane : laneMap.values()) {
             int rgt = lane.getRgt().getValue();
             if (rgt <= 0) continue;
@@ -318,7 +318,8 @@ public class SSFR implements Runnable {
             }
         }
 
-        // 7) Atualizar sysUpTime (TimeTicks, 1/100s)
+        // Update sysUpTime (TimeTicks, 1/100s)
+        // 1sec step time
         int stepMs = mib.getSysStepTime().getValue().toInt();
         if (stepMs <= 0) stepMs = 1000;
         long deltaTicks = stepMs / 10;

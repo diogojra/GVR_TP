@@ -4,17 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9963d187-f803-411a-9025-ffbf43ed3998" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/snmp4j_agent_3_8_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="9963d187-f803-411a-9025-ffbf43ed3998" name="Changes" comment="VACM">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.bc" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.bc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.cfg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GVR_TP.iml" beforeDir="false" afterPath="$PROJECT_DIR$/GVR_TP.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Agent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Agent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AgentConfig.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/AgentConfig.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/GVRTPMIBG1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/GVRTPMIBG1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SSFR.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SSFR.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TestAgent2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestAgent2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/escalar/12 vias/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/escalar/12 vias/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/escalar/2 conectores/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/escalar/2 conectores/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/escalar/2 geradores e 1 mais a meio/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/escalar/2 geradores e 1 mais a meio/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/escalar/basico/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/escalar/basico/lanes.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lanes.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/lanes.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,12 +99,26 @@
       <workItem from="1768341564515" duration="67000" />
       <workItem from="1768341640794" duration="2000" />
       <workItem from="1768342082258" duration="79000" />
-      <workItem from="1769004856997" duration="7202000" />
+      <workItem from="1769004856997" duration="13266000" />
     </task>
+    <task id="LOCAL-00001" summary="VACM">
+      <option name="closed" value="true" />
+      <created>1769012251920</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769012251920</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="s" />
+    <MESSAGE value="VACM" />
+    <option name="LAST_COMMIT_MESSAGE" value="VACM" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -14,7 +14,7 @@ public class SD implements Runnable {
     private static final int YELLOW = 2;
     private static final int RED = 3;
 
-    // --- traffic light time configuration ---
+    //traffic light time configuration
     private static final int YELLOW_TIME_MS = 3000;
     private static final int GREEN_TIME_MS = 8000;
 
@@ -57,7 +57,7 @@ public class SD implements Runnable {
         if (stepMs <= 0) stepMs = 1000;
 
         // Mapping of topology
-        // if multiple lanes feed into the same destination, an interception is formmed
+        // if multiple lanes feed into the same destination, an interception is formed
         Map<Integer, Integer> laneToDestMap = new HashMap<>();
 
         for (Iterator<?> it = viaDestModel.iterator(); it.hasNext(); ) {
@@ -227,14 +227,14 @@ public class SD implements Runnable {
         for (GVRTPMIBG1.LaneEntryRow lane : generators) {
             int veiculos = (int) lane.getVehicleCount().getValue();
             int capacidade = lane.getCapacity().getValue();
-            // Saturation metric = V / C
+            // Occupancy = V / C
             double occupancy = (capacidade > 0) ? (double) veiculos / capacidade : 0.0;
 
             if (occupancy > maxOccupancy) {
                 maxOccupancy = occupancy;
                 bestCandidate = lane;
             } else if (occupancy == maxOccupancy) {
-                // If both have equal saturations then its decided based on vehicle count
+                // If both have equal occupance % then its decided based on vehicle count
                 if (bestCandidate != null && veiculos > bestCandidate.getVehicleCount().getValue()) {
                     bestCandidate = lane;
                 }
