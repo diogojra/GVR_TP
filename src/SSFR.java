@@ -7,7 +7,7 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.TimeTicks;
 
 /**
- * SSFR reformulated:
+ * SSFR:
  * - finds terminal lanes ( lanes without destination ),
  * - drains the vehicles in the terminal lane
  * - processes the level before and depending on the traffic light and destinationflux it sends the vehicles,

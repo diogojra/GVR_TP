@@ -17,7 +17,10 @@ import java.util.*;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.Timer;
-
+/**
+ * TESTAGENT2:
+ *      User interface to make request and see the data in a better way
+ */
 public class TestAgent2 extends JFrame {
 
     // --- SNMP CONFIG ---

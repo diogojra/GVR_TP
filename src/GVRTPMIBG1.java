@@ -262,7 +262,7 @@ public class GVRTPMIBG1
         laneEntryColumns[idxRgt] =
                 moFactory.createColumn(colRgt,
                         SMIConstants.SYNTAX_INTEGER32,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
         laneEntryColumns[idxTotalVeh] =
                 moFactory.createColumn(colTotalVeh,
                         SMIConstants.SYNTAX_INTEGER32,
@@ -270,7 +270,7 @@ public class GVRTPMIBG1
         laneEntryColumns[idxViaterminal] =
                 moFactory.createColumn(colViaterminal,
                         SMIConstants.SYNTAX_INTEGER,
-                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE));
+                        moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY));
         // Table model
         laneEntryModel =
                 moFactory.createTableModel(oidLaneEntry,

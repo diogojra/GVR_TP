@@ -4,7 +4,7 @@ import java.util.*;
 /**
    logic:
    independent lanes follow a timed cycle (independent lanes are the ones with no interceptions)
-   intersections: Use a algorithm to choose a lane to prioritize certain lanes (most occupied)
+   intersections: Use a algorithm to choose a lane to prioritize certain lanes (the ones with less vehciles get a bigger flux)
 */
 public class SD implements Runnable {
 
