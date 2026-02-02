@@ -194,7 +194,7 @@ public class SSFR implements Runnable {
                 Map<Integer, Double> weights = new HashMap<>();
                 double totalWeight = 0.0;
 
-                // Calculates the weight for every option (Based on free capicity %)
+                // Calculates the weight for every option (Based on free capacity %)
                 for (GVRTPMIBG1.ViaDestEntryRow d : candidates) {
                     int destId = d.getDestVia().getValue();
                     GVRTPMIBG1.LaneEntryRow destLane = laneMap.get(destId);

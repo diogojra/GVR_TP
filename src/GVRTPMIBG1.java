@@ -346,10 +346,10 @@ public class GVRTPMIBG1
                 new TimeTicks(0)
         );
 
-        // sysStepTime: por exemplo passo de simulação em ms, read-write
+        // sysStepTime: por exemplo passo de simulação em ms, read-only
         sysStepTime = new MOScalar<>(
                 oidSysStepTime,
-                moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_WRITE),
+                moFactory.createAccess(MOAccessImpl.ACCESSIBLE_FOR_READ_ONLY),
                 new Integer32(1000)   // valor inicial (podes mudar)
         );
     }
